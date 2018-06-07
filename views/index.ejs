@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1A80BB">
+    <title>Barion Bookstore</title>
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <!--<link rel="stylesheet" href="/dist/css/framework7.ios.css">-->
+    <link rel="stylesheet" href="./../stylesheets/icons.css">
+    <link rel="stylesheet" href="./../stylesheets/my.css">
+    <link rel="stylesheet" href="./../stylesheets/framework7.barion.css">
+</head>
+<body>
+    <div id="app">
+        <div class="statusbar"></div>
+        <div class="view view-main">
+            
+            <!-- PAGE 1 - List -->
+            <div class="page" data-name="booklist">
+                <div class="navbar">
+                    <div class="navbar-inner sliding">
+                        <div class="left">
+                            <a id="exitButton" href="#" class="link">
+                                <i class="icon icon-back"></i>
+                                <span>Market</span>
+                            </a>
+                        </div>
+                        <div class="title">E vignette</div>
+                    </div>
+                </div>
+
+                <div class="page-content">
+                    <div class="list-template"></div>
+                    <div class="time-template"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript files -->
+    <script type="text/javascript" src="./../javascripts/BarionMarket.js"></script>
+    <script type="text/javascript" src="./../javascripts/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="./../javascripts/framework7/dist/js/framework7.min.js"></script>
+    <script type="text/javascript" src="./../javascripts/ematrica-app.js"></script>
+    
+
+    <script id="vignetteTemplate" type="text/template7">
+        <ul class="book-list">
+            {{#each vignetteList}}
+            <li class="vignette-type-list-item" data-vignette-id="{{vignetteId}}">
+                <div class="card demo-card-header-pic">
+                    <div class="card-content card-content-padding book">
+                        <div class="book-header">
+                            
+                            <strong class="title">{{vignetteTitle}}</strong><br />
+                            <span class="price">{{vignettePrice}} Ft</span>
+                            <!--<span class="details"><a class="book-link" href="/bookdetails/" data-vignette-id="{{vignetteId}}">Details &raquo;</a></span>-->
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+    </script>
+    
+    <script id="detailsTemplate" type="text/template7">
+        <div class="card demo-card-header-pic">
+            <div class="card-content card-content-padding book">
+                <div class="book-header">
+                    <img class="book-cover" src="{{bookImage}}" width="80" height="120" />
+                    <strong class="title">{{bookTitle}}</strong><br />
+                    <span class="author">{{bookAuthor}}</span>
+                    <div class="rating">
+                        <small>Rating: <b>{{bookRating}}</b> <i>({{bookReviews}} reviews)</i></small><br />
+                        <span class="icon icon-star-full"></span>
+                        <span class="icon icon-star-full"></span>
+                        <span class="icon icon-star-full"></span>
+                        <span class="icon icon-star-full"></span>
+                        <span class="icon icon-star-half"></span>
+                    </div>
+                    <span class="price">{{bookPrice}} Ft</span>
+                </div>
+                <div class="titlebar">
+                    <span>DETAILS</span>
+                </div>
+                <div class="book-details">
+                    <ul>
+                        <li>Publisher: <b>{{bookPublisher}}</b></li>
+                        <li>Media type: <b>{{bookType}}</b></li>
+                        <li>ISBN: <b>{{bookISBN}}</b></li>
+                        <li>Availability: <b>{{bookAvailability}}</b></li>
+                    </ul>
+                </div>
+                <div class="titlebar">
+                    <span>SUMMARY</span>
+                </div>
+                <div class="book-summary">{{bookSummary}}</div>
+            </div>
+        </div>
+        <div class="block">
+            <input type="button" id="setShippingButton" class="col button button-big" value="Continue to shipping address" data-book-id="{{bookID}}" />
+        </div>
+    </script>
+
+    <script id="summaryTemplate" type="text/template7">
+        <div class="card demo-card-header-pic">
+            <div class="card-content card-content-padding book">
+                
+                <div class="titlebar">
+                    <span>VEHICLE</span>
+                </div>
+                <div class="book-details">
+                    <ul>
+                        <li>Licenseplate: <b>{{vehicle.licensePlate}}</b></li>
+                        <li>Type: <b>{{vehicle.type}}</b></li>
+                        </ul>
+                    <div class="block">
+                        <input type="button" id="changeVehicleButton" class="col button button-big hidden" value="Change vehicle" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <input type="button" id="selectVignetteButton" class="col button button-big hidden" value="Select vignette" data-vignette-id="{{vignetteId}}" />
+        </div>
+    </script>
+
+    <script id="timeTemplate" type="text/template7">
+        
+        <div class="card demo-card-header-pic">
+            <div class="card-content card-content-padding">
+                    
+                    <div class="book-details">
+                            <ul>
+                                <li>Title: <b>{{productData.vignette.title}}</b></li>
+                                <li>Time: <b>{{productData.vignette.time}}</b></li>
+                                </ul>
+                            
+                        </div>
+            </div>
+        </div>
+        
+        <div class="block">
+            <input type="button" id="buyVignetteButton" class="col button button-big hidden" value="Buy with Barion" data-vignette-id="{{productData.vignetteId}}" />
+        </div>
+    </script>
+</body>
+</html>
