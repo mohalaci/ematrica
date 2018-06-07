@@ -4,14 +4,14 @@ var db = mongo.MongoClient;
 var networkDb = "mongodb://localhost:27017/network";
 var ematricaDb = "mongodb://localhost:27017/ematrica";
 
-function getProductById(selectedProductIds, callback){
+function getProductsById(selectedProductIds, callback){
     console.log("getProductById started");
     console.log(selectedProductIds);
     //var obj_ids = selectedProductIds.map(function(id){
       //  return ObjectId(id);
     //});
     //console.log(obj_ids);
-    var ids = selectedProductIds.toArray();
+    //var ids = selectedProductIds.toArray();
     db.connect(ematricaDb, function(err, database){
         if (err){
             console.log(err);
@@ -19,22 +19,42 @@ function getProductById(selectedProductIds, callback){
         }
         var dBase = database.db("ematrica");
 
-        var result;
-        dBase.collection("products").find({
-            //$or: [{'productId': {$in: selectedProductIds}}]
-            'productId': {"$in":ids}
-        }, function (err, result){
-            if (err){ 
-                console.log("errorr:");
-                console.log(err);
+        var resultData = new Array();
+        var cursor = dBase.collection("products").find();
+        //console.log(cursor.length);
+        //var a = cursor.map(it => selectedProductIds.filter(p => it.productId == p));
+        //console.log(a);
+        cursor.each(function (err, item) {
+            if (err || item == null) {
+                database.close();
+                console.log("done");
+                console.log(resultData.length);
+                if (resultData.length > 0) {
+                    callback(null, resultData);
+                } else {
+                    callback(err);
+                }
             } else {
-                //console.log("db result:");
-                console.log("resultttt:");
-                console.log(result.length);    
+                var f = selectedProductIds.filter(p => item.productId == p);
+                
+                if (f.length > 0){
+                    var data = {
+                        productId: item.productId,
+                        productName: item.productName,
+                        productType: item.productType,
+                        productDescription: item.productDescription,
+                        productUnit: item.productUnit,
+                        productUnitPrice: item.productUnitPrice,
+                        productCurrency: item.productCurrency
+                    }
+                    if (resultData.indexOf(data) == -1){
+                        resultData.push(data);
+                    }
+                    //resultData.push(data)
+                }
+                
             }
-            database.close();
-            callback(result);
-        });
+        })
         
     }); 
 }
@@ -47,26 +67,22 @@ function initProductsIfNotExist(){
         }
         var dBase = database.db("ematrica");
         //console.log("dBase created");
-        let collections = dBase.listCollections();
-        //console.log("list collections");
-        //console.log(collections);
         var isExists = false;
-        if (collections != undefined) {
-            //console.log("foreach collections");
-            //console.log(collections.length);
-            for (let i = 0; i < collections.length; i++) {
-                //console.log("inside foreach");
-                let coll = collections[i];
-                
-                if (coll.name == "products"){
+        console.log("start");
+        dBase.listCollections().toArray(function(err, colls){
+            console.log(colls.length);
+            if (err){
+                console.log(err);
+            }
+            for (let i = 0; i < colls.length; i++){
+                console.log(colls[i]);
+                if (colls[i].name == "products"){
                     isExists = true;
                 }
             }
-            //console.log("end of foreach");
-        }
-        //console.log("initdata");
+            console.log("initdata");
         if (!isExists){
-            //console.log("isExists is false;");
+            console.log("isExists is false;");
             //dBase.createCollection("products");
             dBase.collection("products").insertMany([{
                 productId: "D1-01",
@@ -214,6 +230,9 @@ function initProductsIfNotExist(){
                 productCurrency: "HUF"
             }]);
         }
+        database.close();
+        });
+        
     });
 }
 
@@ -237,6 +256,7 @@ function saveNetworkData(data){
         dBase.collection("network").insertOne(data, function (err, res) {
             if (err) {
                 console.log(err);
+                database.close();
                 return;
             }
             database.close();
@@ -278,4 +298,4 @@ module.exports.getNetworkData = getNetworkData;
 module.exports.saveNetworkData = saveNetworkData;
 module.exports.saveNetworkLog = saveNetworkLog;
 module.exports.initProductsIfNotExist = initProductsIfNotExist;
-module.exports.getProductById = getProductById;
+module.exports.getProductsById = getProductsById;

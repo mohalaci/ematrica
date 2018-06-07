@@ -1,29 +1,29 @@
 var $selectedVignetteId;
 var $vignetteList = [
-  {
-    vignetteId : "D1-01",
-    vignetteTime : "Heti",
-    vignetteTitle : "D1 heti matrica",
-    vignettePrice : "2975 Ft"
-  },
-  {
-    vignetteId : "D1-02",
-    vignetteTime : "Havi",
-    vignetteTitle : "D1 havi matrica",
-    vignettePrice : "4780 Ft"
-  },
-  {
-    vignetteId : "D1-03",
-    vignetteTime : "Eves orszagos",
-    vignetteTitle : "D1 eves orszagos matrica",
-    vignettePrice : "42980 Ft"
-  },
-  {
-    vignetteId : "D1-04",
-    vignetteTime : "Eves megyei",
-    vignetteTitle : "D1 eves megyei matrica",
-    vignettePrice : "5000 Ft"
-  }
+    {
+        vignetteId: "D1-01",
+        vignetteTime: "Heti",
+        vignetteTitle: "D1 heti matrica",
+        vignettePrice: "2975 Ft"
+    },
+    {
+        vignetteId: "D1-02",
+        vignetteTime: "Havi",
+        vignetteTitle: "D1 havi matrica",
+        vignettePrice: "4780 Ft"
+    },
+    {
+        vignetteId: "D1-03",
+        vignetteTime: "Eves orszagos",
+        vignetteTitle: "D1 eves orszagos matrica",
+        vignettePrice: "42980 Ft"
+    },
+    {
+        vignetteId: "D1-04",
+        vignetteTime: "Eves megyei",
+        vignetteTitle: "D1 eves megyei matrica",
+        vignettePrice: "5000 Ft"
+    }
 ];
 var $shippingAddress = null;
 var $defaultShipping = {
@@ -43,14 +43,14 @@ var $defaultShipping = {
     "door": "5",
     "companyName": "Test Inc."
 };
-var $productData ;
+var $productData;
 var $v = {
-  licensePlate: "ASD321",
+    licensePlate: "ASD321",
     type: "CAR"
 };
 var $summaryData = {
-  vehicle : $v,
-  address: $defaultShipping
+    vehicle: $v,
+    address: $defaultShipping
 }
 
 var $cTimeTemplate;
@@ -103,62 +103,97 @@ var app = new Framework7({
                             vehicle: $v,
                             shipping: $shippingAddress
                         };
-                        var content = $cSummaryTemplate({summaryData: $summaryData});
+                        var content = $cSummaryTemplate({ summaryData: $summaryData });
                         $(".summary-template").html(content);
                     }
                 }
             }
         },
         {
-          name: 'time',
-          path: '/time/',
-          url: '/',
-          on: {
-              pageInit: function (e, page) {
-                console.log("time oldal betoltodik");
-                  if ($selectedVignetteId != null ) {
-                      //var bookData = books[$selectedBook - 1];
-                      $vignette = {
-                        time : "unknown",
-                        title : "unknown"
-                      };
-                      switch ($selectedVignetteId){
-                        case "D1-01":
-                          $vignette = {
-                            title:"matol 10 nap",
-                            time: "10 nap"
-                          }
-                          break;
-                        case "D1-02":
+            name: 'time',
+            path: '/time/',
+            url: '/',
+            on: {
+                pageInit: function (e, page) {
+                    console.log("time oldal betoltodik");
+                    if ($selectedVignetteId != null) {
+                        //var bookData = books[$selectedBook - 1];
                         $vignette = {
-                          title:"1 honap",
-                          time: "1 honap"
+                            time: "unknown",
+                            title: "unknown"
                         };
-                          break;
-                          case "D1-03":
-                        $vignette = {
-                          title:"1 ev",
-                          time: "1 ev"
+                        switch ($selectedVignetteId) {
+                            case "D1-01":
+                                $vignette = {
+                                    title: "matol 10 nap",
+                                    time: "10 nap"
+                                }
+                                break;
+                            case "D1-02":
+                                $vignette = {
+                                    title: "1 honap",
+                                    time: "1 honap"
+                                };
+                                break;
+                            case "D1-03":
+                                $vignette = {
+                                    title: "1 ev",
+                                    time: "1 ev"
+                                };
+                                break;
+                            case "D1-04":
+                                $vignette = {
+                                    title: "1 ev regionalis",
+                                    time: "1 ev regionalis"
+                                };
+                                break;
                         };
-                          break;
-                          case "D1-04":
-                        $vignette = {
-                          title:"1 ev regionalis",
-                          time: "1 ev regionalis"
+                        $productData = {
+                            vignetteId: $selectedVignetteId,
+                            vignette: $vignette
                         };
-                          break;
-                      };
-                      $productData = {
-                          vignetteId: $selectedVignetteId,
-                          vignette: $vignette
-                      };
-                      var content = $cTimeTemplate({productData: $productData});
-                      console.log(content.productData);
-                      $(".time-template").html(content);
-                  }
-              }
-          }
-      },
+                        var content = $cTimeTemplate({ productData: $productData });
+                        console.log(content.productData);
+                        $(".time-template").html(content);
+                    var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    var calendarInline = app.calendar.create({
+                        containerEl: '#demo-calendar-inline-container',
+                        value: [new Date()],
+                        weekHeader: false,
+                        renderToolbar: function () {
+                            return '<div class="toolbar calendar-custom-toolbar no-shadow">' +
+                                '<div class="toolbar-inner">' +
+                                '<div class="left">' +
+                                '<a href="#" class="link icon-only"><i class="icon icon-back ' + (app.theme === 'md' ? 'color-black' : '') + '"></i></a>' +
+                                '</div>' +
+                                '<div class="center"></div>' +
+                                '<div class="right">' +
+                                '<a href="#" class="link icon-only"><i class="icon icon-forward ' + (app.theme === 'md' ? 'color-black' : '') + '"></i></a>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                        },
+                        on: {
+                            init: function (c) {
+                                $$('.calendar-custom-toolbar .center').text(monthNames[c.currentMonth] + ', ' + c.currentYear);
+                                $$('.calendar-custom-toolbar .left .link').on('click', function () {
+                                    calendarInline.prevMonth();
+                                });
+                                $$('.calendar-custom-toolbar .right .link').on('click', function () {
+                                    calendarInline.nextMonth();
+                                });
+                            },
+                            monthYearChangeStart: function (c) {
+                                $$('.calendar-custom-toolbar .center').text(monthNames[c.currentMonth] + ', ' + c.currentYear);
+                            }
+                        }
+                    });
+
+                    
+                    }
+                }
+            }
+        },
         {
             path: '/done/',
             url: '/done.html'
@@ -222,7 +257,7 @@ $(document).ready(function () {
 
     var summaryTemplate = $$('script#summaryTemplate').html();
     $cSummaryTemplate = Template7.compile(summaryTemplate);
-    
+
     var content = $cSummaryTemplate($summaryData);
     $$(".list-template").html(content);
 
@@ -234,18 +269,18 @@ $(document).ready(function () {
     $(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
 
     $(document).on('click', "#selectVignetteButton", function () {
-      var $card = $(this).find('.card');
-      $card.addClass('touched');
-      $selectedVignetteId = $(this).attr("data-vignette-id");
-      mainView.router.navigate("/vignettelist/");
-  });
-/*
-  $(document).on('click', "#selectVignetteButton", function () {
-    var $card = $(this).find('.card');
-    $card.addClass('touched');
-    $selectedVignetteId = $(this).attr("data-vignette-id");
-    mainView.router.navigate("/vignettelist/");
-});*/
+        var $card = $(this).find('.card');
+        $card.addClass('touched');
+        $selectedVignetteId = $(this).attr("data-vignette-id");
+        mainView.router.navigate("/vignettelist/");
+    });
+    /*
+      $(document).on('click', "#selectVignetteButton", function () {
+        var $card = $(this).find('.card');
+        $card.addClass('touched');
+        $selectedVignetteId = $(this).attr("data-vignette-id");
+        mainView.router.navigate("/vignettelist/");
+    });*/
 
     $(document).on('click', ".vignette-type-list-item", function () {
         var $card = $(this).find('.card');
@@ -279,36 +314,38 @@ $(document).ready(function () {
 });
 
 function getPaymentId() {
-  $("#buyVignetteButton").addClass('disabled').attr('disabled', 'disabled');
-  var vignette = $selectedVignetteId;
-  console.log(vignette);
-  var vignettes = new Array();
-  vignettes.push(vignette);
-  vignettes.push("D1-01");
-  console.log(vignettes);
-  $.ajax({
-      method: "POST",
-      url: "/payment/start",
-      data: {
-          vIds: vignettes,
-          locale: "hu-HU",
-          currency: "HUF",
+    $("#buyVignetteButton").addClass('disabled').attr('disabled', 'disabled');
+    var vignette = $selectedVignetteId;
+    console.log(vignette);
+    var vignettes = new Array();
+    vignettes.push(vignette);
+    $.ajax({
+        method: "POST",
+        url: "/payment/start",
+        data: {
+            vIds: vignettes,
+            locale: "hu-HU",
+            currency: "HUF",
 
-      },
-      traditional: true,
-      dataType: "json",
-      error: function (xhr, status, error) {
-          alert("ERROR: " + error + "\r\nStatus: " + status);
-      },
-      success: function (data, status, xhr) {
-          if (status == "success") {
-              redirectToBarionPaymentGateway(data.paymentId);
-          } else {
-              alert("Request finished with status code '" + status + "', could not process response.");
-          }
-      },
-      complete: function () {
-          $("#buyVignetteButton").removeClass('disabled').removeAttr('disabled');
-      }
-  });
+        },
+        traditional: true,
+        dataType: "json",
+        error: function (xhr, status, error) {
+            alert("ERROR: " + error + "\r\nStatus: " + status);
+        },
+        success: function (data, status, xhr) {
+            if (status == "success") {
+                redirectToBarionPaymentGateway(data.paymentId);
+            } else {
+                alert("Request finished with status code '" + status + "', could not process response.");
+            }
+        },
+        complete: function () {
+            $("#buyVignetteButton").removeClass('disabled').removeAttr('disabled');
+        }
+    });
+}
+
+function redirectToBarionPaymentGateway(paymentId) {
+    window.location.href = "https://test.barion.com/pay?id=" + paymentId;
 }

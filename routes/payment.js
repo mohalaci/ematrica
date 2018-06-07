@@ -45,9 +45,9 @@ router.post('/start', urlencodedParser, function (req, res, next) {
     for (var i=0;i<vignettes.length;i++){
         console.log(vignettes[i]);
     }
-    db.getProductById(req.body.vIds, function(product){
+    db.getProductsById(req.body.vIds, function(err, product){
         console.log("callback function called");
-        console.log(product.productId);
+        console.log(product);
         if (product != null){
             var paymentStartRequestBuilder = new BarionRequestBuilderFactory.BarionPaymentStartRequestBuilder();
 
@@ -70,8 +70,12 @@ router.post('/start', urlencodedParser, function (req, res, next) {
                     res.status(400).json(resp);
                     return;
                 }
+        console.log("totalprice:")
         
-                let totalPrice = product.productUnitPrice;
+                let totalPrice = 0;
+                for (var i= 0;i<product.length;i++){
+                    totalPrice += product[i].productUnitPrice;
+                }
                 if (totalPrice == null || totalPrice == undefined) {
                     var resp = { error: "totalPrice is null" };
                     var respJson = JSON.stringify(resp);
@@ -81,16 +85,16 @@ router.post('/start', urlencodedParser, function (req, res, next) {
                 }
         
                 var items = [];
-                if (req.body.items != null && req.body.items != undefined) {
+                if (product != null && product != undefined) {
         
-                    req.body.items.forEach(i => {
+                    product.forEach(i => {
         
-                        let name = i.itemName;
-                        let desc = i.description;
-                        let quantity = i.quantity;
-                        let unit = i.unit;
-                        let unitPrice = i.unitPrice;
-                        let itemTotal = i.itemTotal;
+                        let name = i.productName;
+                        let desc = i.productDescription;
+                        let quantity = 1;
+                        let unit = i.productUnit;
+                        let unitPrice = i.productUnitPrice;
+                        //let itemTotal = i.itemTotal;
         
                         let item = {
                             Name: name,
@@ -98,7 +102,7 @@ router.post('/start', urlencodedParser, function (req, res, next) {
                             Quantity: quantity,
                             Unit: unit,
                             UnitPrice: unitPrice,
-                            ItemTotal: itemTotal
+                            ItemTotal: totalPrice
                         };
         
                         items.push(item);
