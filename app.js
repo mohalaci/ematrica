@@ -48,4 +48,12 @@ app.use(function(err, req, res, next) {
   
 });
 
+var server = app.listen(8091, function () {
+  var host = server.address().address
+  var port = server.address().port
+
+  console.log("Plugin server listening at http://%s:%s", host, port)
+
+})
+
 module.exports = app;
