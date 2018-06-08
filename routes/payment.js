@@ -22,7 +22,46 @@ var BarionRequestBuilderFactory = barion.BarionRequestBuilderFactory;
 
 router.get('/paymentState', function(req, res, next){
     res.setHeader('Content-Type', 'application/json');
-    res.status(200);
+    res.status(500);
+    db.saveNetworkLog("Client", "BackEnd", req.query);
+    var paymentId = req.query.paymentId
+    if (paymentId != null) {
+
+        var getPaymentStateOptionsWithBuilder = getPaymentStateRequestBuilder
+            .setPOSKey(config.shop.posKey)
+            .setPaymentId(paymentId)
+            .build();
+
+        var paymentState;
+        async.series([
+        function (callback) {
+            barion.getPaymentState(getPaymentStateOptionsWithBuilder, function (err, data) {
+                if (err) {
+                    var respJson = JSON.stringify(err);
+                    db.saveNetworkLog("BarionAPI", "BackEnd", respJson);
+                    paymentData = "errror";
+                    callback()
+                } else {
+                    console.log("getPaymentState result, data: ")
+                    //console.log(data)
+                    var respJson = JSON.stringify(data);
+                    db.saveNetworkLog("BarionAPI", "BackEnd", respJson);
+                    callback(data)
+                }
+            })
+        }], function (data) {
+            if (data) {
+                res.status(200)
+                var respJson = JSON.stringify(data);
+                db.saveNetworkLog("BackEnd", "Client", respJson)
+                console.log(JSON.stringify({ status: data.Status }))
+                res.json({ status: data.Status })
+            } else {
+                res.status(400)
+                res.json({ ERROR: "ERROR" })
+            }
+        })
+    }
 });
 
 router.post('/start', urlencodedParser, function (req, res, next) {

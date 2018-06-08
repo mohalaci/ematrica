@@ -4,14 +4,51 @@ var db = mongo.MongoClient;
 var networkDb = "mongodb://localhost:27017/network";
 var ematricaDb = "mongodb://localhost:27017/ematrica";
 
+function getProductsByVehicleType(selectedVehicleType, callback){
+    db.connect(ematricaDb, function(err, database){
+        if (err){
+            console.log(err);
+            callback(err, null);
+            return;
+        }
+        var dBase = database.db("ematrica");
+        var resultData = new Array();
+        var cursor = dBase.collection("products").find({'productAvailableCategory' : selectedVehicleType});
+        cursor.each(function (err, item) {
+            if (err || item == null) {
+                database.close();
+                console.log("done");
+                console.log(resultData.length);
+                if (resultData.length > 0) {
+                    callback(null, resultData);
+                } else {
+                    callback(err);
+                }
+            } else {
+                console.log("item:");
+                console.log(item);
+                var data = {
+                    productId: item.productId,
+                    productName: item.productName,
+                    productType: item.productType,
+                    productDescription: item.productDescription,
+                    productUnit: item.productUnit,
+                    productUnitPrice: item.productUnitPrice,
+                    productCurrency: item.productCurrency
+                }
+                if (resultData.indexOf(data) == -1){
+                    resultData.push(data);
+                }
+                
+            }
+        })
+    })
+}
+
 function getProductsById(selectedProductIds, callback){
     console.log("getProductById started");
     console.log(selectedProductIds);
-    //var obj_ids = selectedProductIds.map(function(id){
-      //  return ObjectId(id);
-    //});
-    //console.log(obj_ids);
-    //var ids = selectedProductIds.toArray();
+    
     db.connect(ematricaDb, function(err, database){
         if (err){
             console.log(err);
@@ -21,9 +58,7 @@ function getProductsById(selectedProductIds, callback){
 
         var resultData = new Array();
         var cursor = dBase.collection("products").find();
-        //console.log(cursor.length);
-        //var a = cursor.map(it => selectedProductIds.filter(p => it.productId == p));
-        //console.log(a);
+        
         cursor.each(function (err, item) {
             if (err || item == null) {
                 database.close();
@@ -50,7 +85,6 @@ function getProductsById(selectedProductIds, callback){
                     if (resultData.indexOf(data) == -1){
                         resultData.push(data);
                     }
-                    //resultData.push(data)
                 }
                 
             }
@@ -88,6 +122,7 @@ function initProductsIfNotExist(){
                 productId: "D1-01",
                 productName: "10 napos matrica",
                 productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER"],
                 productDescription: "D1 - 10 napos matrica",
                 productUnit: "db",
                 productUnitPrice: 2975,
@@ -96,6 +131,7 @@ function initProductsIfNotExist(){
                 productId: "D1-02",
                 productName: "Havi matrica",
                 productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER","MOTOR"],
                 productDescription: "D1 - havi matrica",
                 productUnit: "db",
                 productUnitPrice: 4780,
@@ -104,6 +140,7 @@ function initProductsIfNotExist(){
                 productId: "D1-03",
                 productName: "Éves országos matrica",
                 productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
                 productDescription: "D1 - Éves országos matrica",
                 productUnit: "db",
                 productUnitPrice: 42980,
@@ -112,6 +149,7 @@ function initProductsIfNotExist(){
                 productId: "D1-04",
                 productName: "Éves megyei matrica",
                 productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
                 productDescription: "D1 - Éves megyei matrica",
                 productUnit: "db",
                 productUnitPrice: 5000,
@@ -120,6 +158,7 @@ function initProductsIfNotExist(){
                 productId: "D2-01",
                 productName: "10 napos matrica",
                 productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
                 productDescription: "D2 - 10 napos matrica",
                 productUnit: "db",
                 productUnitPrice: 5950,
@@ -128,6 +167,7 @@ function initProductsIfNotExist(){
                 productId: "D2-02",
                 productName: "Havi matrica",
                 productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
                 productDescription: "D2 - havi matrica",
                 productUnit: "db",
                 productUnitPrice: 9560,
@@ -136,6 +176,7 @@ function initProductsIfNotExist(){
                 productId: "D2-03",
                 productName: "Éves országos matrica",
                 productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
                 productDescription: "D2 - Éves országos matrica",
                 productUnit: "db",
                 productUnitPrice: 42980,
@@ -144,6 +185,7 @@ function initProductsIfNotExist(){
                 productId: "D2-04",
                 productName: "Éves megyei matrica",
                 productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
                 productDescription: "D2 - Éves megyei matrica",
                 productUnit: "db",
                 productUnitPrice: 10000,
@@ -152,6 +194,7 @@ function initProductsIfNotExist(){
                 productId: "U-01",
                 productName: "10 napos matrica",
                 productType: "U",
+                productAvailableCategory: ["TRAILER"],
                 productDescription: "U - 10 napos matrica",
                 productUnit: "db",
                 productUnitPrice: 2975,
@@ -160,6 +203,7 @@ function initProductsIfNotExist(){
                 productId: "U-02",
                 productName: "Havi matrica",
                 productType: "U",
+                productAvailableCategory: ["TRAILER"],
                 productDescription: "U - havi matrica",
                 productUnit: "db",
                 productUnitPrice: 4780,
@@ -168,6 +212,7 @@ function initProductsIfNotExist(){
                 productId: "U-03",
                 productName: "Éves országos matrica",
                 productType: "U",
+                productAvailableCategory: ["TRAILER"],
                 productDescription: "U - Éves országos matrica",
                 productUnit: "db",
                 productUnitPrice: 42980,
@@ -176,6 +221,7 @@ function initProductsIfNotExist(){
                 productId: "U-04",
                 productName: "Éves megyei matrica",
                 productType: "U",
+                productAvailableCategory: ["TRAILER"],
                 productDescription: "U - Éves megyei matrica",
                 productUnit: "db",
                 productUnitPrice: 5000,
@@ -184,6 +230,7 @@ function initProductsIfNotExist(){
                 productId: "B2-01",
                 productName: "10 napos matrica",
                 productType: "B2",
+                productAvailableCategory: ["BUS"],
                 productDescription: "B2 - 10 napos matrica",
                 productUnit: "db",
                 productUnitPrice: 13385,
@@ -192,6 +239,7 @@ function initProductsIfNotExist(){
                 productId: "B2-02",
                 productName: "Havi matrica",
                 productType: "B2",
+                productAvailableCategory: ["BUS"],
                 productDescription: "B2 - havi matrica",
                 productUnit: "db",
                 productUnitPrice: 21975,
@@ -200,6 +248,7 @@ function initProductsIfNotExist(){
                 productId: "B2-03",
                 productName: "Éves országos matrica",
                 productType: "B2",
+                productAvailableCategory: ["BUS"],
                 productDescription: "B2 - Éves országos matrica",
                 productUnit: "db",
                 productUnitPrice: 199975,
@@ -208,6 +257,7 @@ function initProductsIfNotExist(){
                 productId: "B2-04",
                 productName: "Éves megyei matrica",
                 productType: "B2",
+                productAvailableCategory: ["BUS"],
                 productDescription: "B2 - Éves megyei matrica",
                 productUnit: "db",
                 productUnitPrice: 20000,
@@ -216,6 +266,7 @@ function initProductsIfNotExist(){
                 productId: "D1M-01",
                 productName: "10 napos matrica",
                 productType: "D1M",
+                productAvailableCategory: ["MOTOR"],
                 productDescription: "D1M - 10 napos matrica",
                 productUnit: "db",
                 productUnitPrice: 1470,
@@ -224,6 +275,7 @@ function initProductsIfNotExist(){
                 productId: "D1M-02",
                 productName: "Havi matrica",
                 productType: "D1M",
+                productAvailableCategory: ["MOTOR"],
                 productDescription: "D1M - havi matrica",
                 productUnit: "db",
                 productUnitPrice: 2500,
@@ -299,3 +351,4 @@ module.exports.saveNetworkData = saveNetworkData;
 module.exports.saveNetworkLog = saveNetworkLog;
 module.exports.initProductsIfNotExist = initProductsIfNotExist;
 module.exports.getProductsById = getProductsById;
+module.exports.getProductsByVehicleType = getProductsByVehicleType;

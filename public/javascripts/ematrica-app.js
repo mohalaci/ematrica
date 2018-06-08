@@ -261,8 +261,8 @@ $(document).ready(function () {
     var content = $cSummaryTemplate($summaryData);
     $$(".list-template").html(content);
 
-    $(document).on('click', "#payWithBarionButton", getPaymentId);
-    $(document).on('click', "#buyVignetteButton", getPaymentId);
+    $(document).on('click', "#payWithBarionButton", startPayment);
+    $(document).on('click', "#buyVignetteButton", startPayment);
     $(document).on('click', "#setShippingButton", barionMarket.getShippingAddress);
     $(document).on('click', "#resultButton", barionMarket.closePlugin);
     $(document).on('click', "#exitButton", barionMarket.closePlugin);
@@ -313,21 +313,23 @@ $(document).ready(function () {
     });
 });
 
-function getPaymentId() {
+function startPayment() {
     $("#buyVignetteButton").addClass('disabled').attr('disabled', 'disabled');
     var vignette = $selectedVignetteId;
     console.log(vignette);
     var vignettes = new Array();
     vignettes.push(vignette);
+    //vignettes.push(vignette);
     $.ajax({
         method: "POST",
         url: "/payment/start",
-        data: {
+        data: JSON.stringify({
             vIds: vignettes,
             locale: "hu-HU",
-            currency: "HUF",
+            currency: "HUF"
 
-        },
+        }),
+        contentType: "application/json",
         traditional: true,
         dataType: "json",
         error: function (xhr, status, error) {
@@ -344,6 +346,28 @@ function getPaymentId() {
             $("#buyVignetteButton").removeClass('disabled').removeAttr('disabled');
         }
     });
+}
+
+function getPaymentState(paymentId){
+    if (paymentId != "undefined") {
+        $.ajax({
+        method: "GET",
+        url: "/payment/paymentstate?paymentId="+paymentId,
+        error: function (xhr, status, error) {
+            alert("ERROR: " + error + "\r\nStatus: " + status);
+        },
+        success: function (data, status, xhr) {
+            if (data.status == "Succeeded") {
+                mainView.router.navigate('/done/', { animate: false });
+            } else {
+                mainView.router.navigate('/failed/', { animate: false });
+            }
+        },
+        complete: function () {
+            $("#payWithBarionButton").removeClass('disabled').removeAttr('disabled');
+        }
+    });
+    }
 }
 
 function redirectToBarionPaymentGateway(paymentId) {

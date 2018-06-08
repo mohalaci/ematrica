@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var path = require("path");
+var db = require('../utils/database');
+var config = require('../utils/config');
 //var app = express();
 //app.use(express.static(__dirname + '/../public/views'));
 
@@ -10,6 +12,28 @@ router.get('/', function(req, res, next) {
   //res.sendFile(path.join(__dirname + '/../public/views/index.html'));
   res.render('index');
 });
+
+router.get('/products', function(req, res){
+  res.setHeader('Content-Type', 'application/json');
+    res.status(500);
+    db.saveNetworkLog("Client", "BackEnd", req.query);
+    if (req.query != undefined && req.query.type != undefined){
+    
+    db.getProductsByVehicleType(req.query.type, function(err, result){
+      if (err){
+        res.status(400).json({error: "Invalid request"});
+        return;
+      }
+      var resp = { products: result };
+      var respJson = JSON.stringify(resp);
+          db.saveNetworkLog("BackEnd", "Client", respJson);
+          res.status(200).json(resp);
+    });
+  } else {
+    res.status(400).json({error:"Invalid request"});
+  }
+  
+})
 
 module.exports = router;
 
