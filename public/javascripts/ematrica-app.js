@@ -73,7 +73,7 @@ var app = new Framework7({
             on: {
                 pageInit: function (e, page) {
                     var content = $cVignetteTemplate({ vignetteList: $vignetteList });
-                    $(".list-template").html(content);
+                    $$(".list-template").html(content);
                 }
             }
         },
@@ -104,7 +104,7 @@ var app = new Framework7({
                             shipping: $shippingAddress
                         };
                         var content = $cSummaryTemplate({ summaryData: $summaryData });
-                        $(".summary-template").html(content);
+                        $$(".summary-template").html(content);
                     }
                 }
             }
@@ -154,7 +154,7 @@ var app = new Framework7({
                         };
                         var content = $cTimeTemplate({ productData: $productData });
                         console.log(content.productData);
-                        $(".time-template").html(content);
+                        $$(".time-template").html(content);
                     var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
                     var calendarInline = app.calendar.create({
                         containerEl: '#demo-calendar-inline-container',
@@ -237,17 +237,15 @@ app.statusbar.setIosTextColor('white');
 app.statusbar.setBackgroundColor('#1A80BB');
 
 app.on('init', function () {
-    if ($('html.ios').length > 0) {
-        $('body').scrollTop(20);
-        $('.view').scrollTop(20);
+    if ($$('html.ios').length > 0) {
+        $$('body').scrollTop(20);
+        $$('.view').scrollTop(20);
     } else {
         app.statusbar.hide();
     }
 });
 
-
-$(document).ready(function () {
-
+$$(document).on('DOMContentLoaded', function(){
     //pre-complie templates
     var timetTemplate = $$('script#timeTemplate').html();
     $cTimeTemplate = Template7.compile(timetTemplate);
@@ -261,17 +259,17 @@ $(document).ready(function () {
     var content = $cSummaryTemplate($summaryData);
     $$(".list-template").html(content);
 
-    $(document).on('click', "#payWithBarionButton", startPayment);
-    $(document).on('click', "#buyVignetteButton", startPayment);
-    $(document).on('click', "#setShippingButton", barionMarket.getShippingAddress);
-    $(document).on('click', "#resultButton", barionMarket.closePlugin);
-    $(document).on('click', "#exitButton", barionMarket.closePlugin);
-    $(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
+    $$(document).on('click', "#payWithBarionButton", startPayment);
+    $$(document).on('click', "#buyVignetteButton", startPayment);
+    $$(document).on('click', "#setShippingButton", barionMarket.getShippingAddress);
+    $$(document).on('click', "#resultButton", barionMarket.closePlugin);
+    $$(document).on('click', "#exitButton", barionMarket.closePlugin);
+    $$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
 
-    $(document).on('click', "#selectVignetteButton", function () {
-        var $card = $(this).find('.card');
+    $$(document).on('click', "#selectVignetteButton", function () {
+        var $card = $$(this).find('.card');
         $card.addClass('touched');
-        $selectedVignetteId = $(this).attr("data-vignette-id");
+        $selectedVignetteId = $$(this).attr("data-vignette-id");
         mainView.router.navigate("/vignettelist/");
     });
     /*
@@ -282,45 +280,47 @@ $(document).ready(function () {
         mainView.router.navigate("/vignettelist/");
     });*/
 
-    $(document).on('click', ".vignette-type-list-item", function () {
-        var $card = $(this).find('.card');
+    $$(document).on('click', ".vignette-type-list-item", function () {
+        var $card = $$(this).find('.card');
         $card.addClass('touched');
         console.log("menjunk a time oldalra most azonnal!");
-        $selectedVignetteId = $(this).attr("data-vignette-id");
+        $selectedVignetteId = $$(this).attr("data-vignette-id");
         mainView.router.navigate("/time/");
     });
 
-    $(document).on('click', ".backToList-link", function (e) {
+    $$(document).on('click', ".backToList-link", function (e) {
         e.preventDefault();
         e.stopPropagation();
         mainView.router.back('/booklist/', { force: true });
     });
 
-    $(document).on('click', ".backToDetails-link", function (e) {
+    $$(document).on('click', ".backToDetails-link", function (e) {
         e.preventDefault();
         e.stopPropagation();
         mainView.router.back('/bookdetails/', { force: true });
     });
 
-    $(document).on('click', ".book-link", function () {
-        $selectedBook = $(this).attr("data-book-id");
+    $$(document).on('click', ".book-link", function () {
+        $selectedBook = $$(this).attr("data-book-id");
     });
 
-    $(document).on('click', ".navbar, .statusbar", function (e) {
+    $$(document).on('click', ".navbar, .statusbar", function (e) {
         e.preventDefault();
         e.stopPropagation();
         return false;
     });
 });
 
+
+
 function startPayment() {
-    $("#buyVignetteButton").addClass('disabled').attr('disabled', 'disabled');
+    $$("#buyVignetteButton").addClass('disabled').attr('disabled', 'disabled');
     var vignette = $selectedVignetteId;
     console.log(vignette);
     var vignettes = new Array();
     vignettes.push(vignette);
     //vignettes.push(vignette);
-    $.ajax({
+    app.request({
         method: "POST",
         url: "/payment/start",
         data: JSON.stringify({
@@ -343,14 +343,14 @@ function startPayment() {
             }
         },
         complete: function () {
-            $("#buyVignetteButton").removeClass('disabled').removeAttr('disabled');
+            $$("#buyVignetteButton").removeClass('disabled').removeAttr('disabled');
         }
     });
 }
 
 function getPaymentState(paymentId){
     if (paymentId != "undefined") {
-        $.ajax({
+        app.request({
         method: "GET",
         url: "/payment/paymentstate?paymentId="+paymentId,
         error: function (xhr, status, error) {
@@ -364,7 +364,7 @@ function getPaymentState(paymentId){
             }
         },
         complete: function () {
-            $("#payWithBarionButton").removeClass('disabled').removeAttr('disabled');
+            $$("#payWithBarionButton").removeClass('disabled').removeAttr('disabled');
         }
     });
     }
