@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var callbackRouter = require('./routes/callback');
 var networkLogRouter = require('./routes/networklog');
 var paymentRouter = require('./routes/payment');
+var redirectRouter = require('./routes/redirect');
 
 var app = express();
 // init scripts:
@@ -30,6 +31,7 @@ app.use('/', indexRouter);
 app.use('/network', networkLogRouter);
 app.use('/callback', callbackRouter);
 app.use('/payment', paymentRouter);
+app.use('/redirect', redirectRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
