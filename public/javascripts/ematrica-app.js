@@ -101,8 +101,8 @@ var app = new Framework7({
                     if ($v != null && $shippingAddress != null) {
                         //var bookData = books[$selectedBook - 1];
                         
-                        var content = $cSummaryTemplate({ summaryData: $v });
-                        $$(".summary-template").html(content);
+                        //var content = $cSummaryTemplate({ summaryData: $v });
+                        //$$(".summary-template").html(content);
                     }
                 }
             }
@@ -271,13 +271,6 @@ $$(document).on('DOMContentLoaded', function(){
         $selectedVignetteId = $$(this).attr("data-vignette-id");
         mainView.router.navigate("/vignettelist/");
     });
-    /*
-      $(document).on('click', "#selectVignetteButton", function () {
-        var $card = $(this).find('.card');
-        $card.addClass('touched');
-        $selectedVignetteId = $(this).attr("data-vignette-id");
-        mainView.router.navigate("/vignettelist/");
-    });*/
 
     $$(document).on('click', ".vignette-type-list-item", function () {
         var $card = $$(this).find('.card');
@@ -381,7 +374,6 @@ function setVehicle(vehicle){
         countryCode: s.countryCode,
         type: s.category
     };
-    console.log(v);
-    var content = $cSummaryTemplate({ summaryData: v });
+    var content = $cSummaryTemplate(v);
     $$(".list-template").html(content);
 }
