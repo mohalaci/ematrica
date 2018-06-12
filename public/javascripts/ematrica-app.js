@@ -328,7 +328,7 @@ function startPayment() {
             alert("ERROR: " + error + "\r\nStatus: " + status);
         },
         success: function (data, status, xhr) {
-            if (status == "success") {
+            if (status == 200) {
                 redirectToBarionPaymentGateway(data.paymentId);
             } else {
                 alert("Request finished with status code '" + status + "', could not process response.");
