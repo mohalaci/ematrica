@@ -375,7 +375,7 @@ function redirectToBarionPaymentGateway(paymentId) {
 
 function setVehicle(vehicle){
     console.log(vehicle);
-    var s = JSON.parse(shippingData);
+    var s = JSON.parse(vehicle);
     var v = {
         licensePlate: s.licensePlate,
         countryCode: s.countryCode,
