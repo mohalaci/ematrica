@@ -383,5 +383,5 @@ function setVehicle(vehicle){
     };
     console.log(v);
     var content = $cSummaryTemplate({ summaryData: v });
-    $$(".summary-template").html(content);
+    $$(".list-template").html(content);
 }
