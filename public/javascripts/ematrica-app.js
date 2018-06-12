@@ -46,7 +46,8 @@ var $defaultShipping = {
 var $productData;
 var $v = {
     licensePlate: "ASD321",
-    type: "CAR"
+    type: "CAR",
+    countryCode: "H"
 };
 var $summaryData = {
     vehicle: $v,
@@ -99,11 +100,8 @@ var app = new Framework7({
                 pageInit: function (e, page) {
                     if ($v != null && $shippingAddress != null) {
                         //var bookData = books[$selectedBook - 1];
-                        var summaryData = {
-                            vehicle: $v,
-                            shipping: $shippingAddress
-                        };
-                        var content = $cSummaryTemplate({ summaryData: $summaryData });
+                        
+                        var content = $cSummaryTemplate({ summaryData: $v });
                         $$(".summary-template").html(content);
                     }
                 }
@@ -256,7 +254,7 @@ $$(document).on('DOMContentLoaded', function(){
     var summaryTemplate = $$('script#summaryTemplate').html();
     $cSummaryTemplate = Template7.compile(summaryTemplate);
 
-    var content = $cSummaryTemplate($summaryData);
+    var content = $cSummaryTemplate($v);
     $$(".list-template").html(content);
 
     $$(document).on('click', "#payWithBarionButton", startPayment);
@@ -265,6 +263,7 @@ $$(document).on('DOMContentLoaded', function(){
     $$(document).on('click', "#resultButton", barionMarket.closePlugin);
     $$(document).on('click', "#exitButton", barionMarket.closePlugin);
     $$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
+    $$(document).on('click', "#changeVehicleButton", barionMarket.getVehicle);
 
     $$(document).on('click', "#selectVignetteButton", function () {
         var $card = $$(this).find('.card');
@@ -372,4 +371,15 @@ function getPaymentState(paymentId){
 
 function redirectToBarionPaymentGateway(paymentId) {
     window.location.href = "https://test.barion.com/pay?id=" + paymentId;
+}
+
+function setVehicle(vehicle){
+    var v = {
+        licensePlate: vehicle.licensePlate,
+        countryCode: vehicle.countryCode,
+        type: vehicle.category
+    };
+    console.log(v);
+    var content = $cSummaryTemplate({ summaryData: v });
+    $$(".summary-template").html(content);
 }
