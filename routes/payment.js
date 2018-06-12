@@ -175,6 +175,7 @@ router.post('/start', urlencodedParser, function (req, res, next) {
                     Locale: locale,
                     Currency: currency,
                     CallbackUrl: config.shop.callbackUrl,
+                    RedirectUrl: config.shop.redirectUrl,
                     Transactions: [
                         {
                             POSTransactionId: posTransactionId,
