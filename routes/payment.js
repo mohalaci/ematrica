@@ -19,24 +19,29 @@ var BarionError = barion.BarionError;
 
 // Import the built-in requestbuilders
 var BarionRequestBuilderFactory = barion.BarionRequestBuilderFactory;
+//var getPaymentStateRequestBuilder = BarionRequestBuilderFactory.BarionGetPaymentStateRequestBuilder();
+
 
 router.get('/paymentState', function(req, res, next){
     res.setHeader('Content-Type', 'application/json');
     res.status(500);
     db.saveNetworkLog("Client", "BackEnd", req.query);
     var paymentId = req.query.paymentId
+    console.log(paymentId)
     if (paymentId != null) {
+        var getPaymentStateRequestBuilder = new BarionRequestBuilderFactory.BarionGetPaymentStateRequestBuilder();
 
         var getPaymentStateOptionsWithBuilder = getPaymentStateRequestBuilder
             .setPOSKey(config.shop.posKey)
             .setPaymentId(paymentId)
             .build();
-
+console.log("megvan a requestguilder, indul a request")
         var paymentState;
         async.series([
         function (callback) {
             barion.getPaymentState(getPaymentStateOptionsWithBuilder, function (err, data) {
                 if (err) {
+                    console.log(err)
                     var respJson = JSON.stringify(err);
                     db.saveNetworkLog("BarionAPI", "BackEnd", respJson);
                     paymentData = "errror";

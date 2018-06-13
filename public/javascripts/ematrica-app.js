@@ -57,6 +57,7 @@ var $summaryData = {
 var $cTimeTemplate;
 var $cVignetteTemplate;
 var $cSummaryTemplate;
+var $cRedirectTemplate;
 
 var app = new Framework7({
     root: '#app',
@@ -198,14 +199,17 @@ var app = new Framework7({
         },
         {
             path: '/failed/',
-            url: '/failed.html'
+            url: '/failed'
         },
         {
             path: '/redirect',
-            url: '/redirect.html',
+            url: '/',
             on: {
                 pageInit: function (e, page) {
+                    var content = $cRedirectTemplate;
+                    $$(".redirect-template").html(content);
                     var query = page.route.query;
+                    console.log("redirect page init");
                     console.log(query);
                     getPaymentState(query.paymentId);
                 }
@@ -253,6 +257,9 @@ $$(document).on('DOMContentLoaded', function(){
 
     var summaryTemplate = $$('script#summaryTemplate').html();
     $cSummaryTemplate = Template7.compile(summaryTemplate);
+
+    var redirectTemplate = $$('script#redirectTemplate').html();
+    $cRedirectTemplate = Template7.compile(redirectTemplate);
 
     var content = $cSummaryTemplate($v);
     $$(".list-template").html(content);
@@ -330,6 +337,8 @@ function startPayment() {
         success: function (data, status, xhr) {
             if (status == 200) {
                 redirectToBarionPaymentGateway(data.paymentId);
+                var content = $cRedirectTemplate;
+                    $$(".redirect-template").html(content);
             } else {
                 alert("Request finished with status code '" + status + "', could not process response.");
             }
@@ -349,7 +358,7 @@ function getPaymentState(paymentId){
             alert("ERROR: " + error + "\r\nStatus: " + status);
         },
         success: function (data, status, xhr) {
-            if (data.status == "Succeeded") {
+            if (JSON.parse(data).status == "Succeeded") {
                 mainView.router.navigate('/done/', { animate: false });
             } else {
                 mainView.router.navigate('/failed/', { animate: false });
