@@ -203,7 +203,7 @@ var app = new Framework7({
         },
         {
             path: '/redirect',
-            url: '/',
+            url: './redirect',
             on: {
                 pageInit: function (e, page) {
                     var content = $cRedirectTemplate;
@@ -336,9 +336,10 @@ function startPayment() {
         },
         success: function (data, status, xhr) {
             if (status == 200) {
-                redirectToBarionPaymentGateway(data.paymentId);
                 var content = $cRedirectTemplate;
                     $$(".redirect-template").html(content);
+                redirectToBarionPaymentGateway(data.paymentId);
+                
             } else {
                 alert("Request finished with status code '" + status + "', could not process response.");
             }
