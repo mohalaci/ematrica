@@ -239,11 +239,13 @@ app.statusbar.setIosTextColor('white');
 app.statusbar.setBackgroundColor('#1A80BB');
 
 app.on('init', function () {
-    if ($$('html.ios').length > 0) {
+    if ($$('html.device-ios').length > 0) {
         $$('body').scrollTop(20);
         $$('.view').scrollTop(20);
     } else {
         app.statusbar.hide();
+        $$('body').scrollTop(20);
+        $$('.view').scrollTop(20);
     }
 });
 
@@ -263,6 +265,15 @@ $$(document).on('DOMContentLoaded', function(){
 
     var content = $cSummaryTemplate($v);
     $$(".list-template").html(content);
+
+    if ($$('html.device-ios').length > 0) {
+        $$('body').scrollTop(20);
+        $$('.view').scrollTop(20);
+    } else {
+        app.statusbar.hide();
+        $$('body').scrollTop(20);
+        $$('.view').scrollTop(20);
+    }
 
     $$(document).on('click', "#payWithBarionButton", startPayment);
     $$(document).on('click', "#buyVignetteButton", startPayment);
