@@ -41,7 +41,7 @@ var barionMarket = new BarionMarket();
 var mainView = app.views.create('.view-main');
 
 app.statusbar.setIosTextColor('white');
-app.statusbar.setBackgroundColor('#1A80BB');
+app.statusbar.setBackgroundColor('#0097DB');
 
 app.on('init', function() {
     if ($$('html.ios').length > 0) {
@@ -89,12 +89,4 @@ function getPaymentState(paymentId){
     });
     }
     
-}
-
-function successfulPaymentCallback(data) {
-    window.location.href = "/done.html";
-}
-
-function unSuccessfulPaymentCallback(data) {
-    window.location.href = "/failed.html";
 }
