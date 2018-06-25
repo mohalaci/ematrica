@@ -61,6 +61,16 @@ var app = new Framework7({
                 }
             }
         },
+        {
+            name: 'redirect',
+            path: '/redirect/',
+            page: 'redirect',
+            on: {
+                pageInit: function(e, page){
+                    console.log("loasdfasfasdf");
+                }
+            }
+        },
         
         {
             path: '/done/',

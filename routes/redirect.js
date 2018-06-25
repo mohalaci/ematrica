@@ -9,7 +9,7 @@ var db = require('../utils/database');
 router.get('/', function(req, res, next) {
     //res.render('index', { title: 'Express' });
     //res.sendFile(path.join(__dirname + '/../public/views/index.html'));
-    res.render('index');
+    res.render('redirect');
   });
 
 /*router.get('/', function(req, res, next){
