@@ -6,7 +6,7 @@ var app = new Framework7({
     routes: [
         {
             path: '/done/',
-            url: '/done.html'
+            url: '/done'
         },
         {
             path: '/failed/',
@@ -74,9 +74,9 @@ $$(document).on('DOMContentLoaded', function(){
     }
     
     
-    $(".page-content").addClass('fading-out');
-    setTimeout(function() { $(".page-content").removeClass('fading-out').addClass('fading-in'); }, 1000);
-    setTimeout(function() { $(".page-content").removeClass('fading-in'); }, 2000);
+    $$(".page-content").addClass('fading-out');
+    setTimeout(function() { $$(".page-content").removeClass('fading-out').addClass('fading-in'); }, 1000);
+    setTimeout(function() { $$(".page-content").removeClass('fading-in'); }, 2000);
 });
 
 
