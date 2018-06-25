@@ -868,7 +868,7 @@
   content: "\ea18";
 }
 .icon-next:before {
-  content: "\ea19";
+  /*content: "\ea19";*/
 }
 .icon-backward:before {
   content: "\ea1a";

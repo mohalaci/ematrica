@@ -19,12 +19,24 @@ router.get('/products', function(req, res){
     db.saveNetworkLog("Client", "BackEnd", req.query);
     if (req.query != undefined && req.query.type != undefined){
     
-    db.getProductsByVehicleType(req.query.type, function(err, result){
+    db.getProductsByVehicleType(req.query.type.toUpperCase(), function(err, result){
       if (err){
         res.status(400).json({error: "Invalid request"});
         return;
       }
-      var resp = { products: result };
+      var highways = [];
+      var yearlyCounty = [];
+      result.forEach(item => {
+        if (item.productCounty != null){
+          console.log("productCounty nem null");
+          console.log(item.productCounty);
+          yearlyCounty.push(item);
+        } else {
+          highways.push(item);
+        }
+      });
+      var resp = { highways: highways,
+      yearlyCounty: yearlyCounty };
       var respJson = JSON.stringify(resp);
           db.saveNetworkLog("BackEnd", "Client", respJson);
           res.status(200).json(resp);

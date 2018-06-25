@@ -3,13 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#1A80BB">
-    <title>Barion Bookstore</title>
+    <meta name="theme-color" content="#0097DB">
+    <title>Barion vehiclestore</title>
     <link rel="shortcut icon" href="/img/favicon.png">
     <!--<link rel="stylesheet" href="/dist/css/framework7.ios.css">-->
-    <link rel="stylesheet" href="./../stylesheets/icons.min.css">
-    <link rel="stylesheet" href="./../stylesheets/my.min.css">
-    <link rel="stylesheet" href="./../stylesheets/framework7.barion.min.css">
+    <link rel="stylesheet" href="./../stylesheets/icons.css">
+    <link rel="stylesheet" href="./../javascripts/framework7/dist/css/framework7.ios.min.css">
+    <link rel="stylesheet" href="./../javascripts/framework7/dist/css/framework7.min.css">
+    <link rel="stylesheet" href="./../stylesheets/my.css">
+    <link rel="stylesheet" href="./../stylesheets/framework7.barion.css">
 </head>
 <body>
     <div id="app">
@@ -17,7 +19,7 @@
         <div class="view view-main">
             
             <!-- PAGE 1 - List -->
-            <div class="page" data-name="booklist">
+            <div class="page" data-name="main">
                 <div class="navbar">
                     <div class="navbar-inner sliding">
                         <div class="left">
@@ -31,9 +33,7 @@
                 </div>
 
                 <div class="page-content">
-                    <div class="list-template"></div>
-                    <div class="time-template"></div>
-                    <div class="redirect-template"></div>
+                    
                 </div>
             </div>
         </div>
@@ -43,121 +43,86 @@
     <script type="text/javascript" src="./../javascripts/BarionMarket.js"></script>
     <script type="text/javascript" src="./../javascripts/framework7/dist/js/framework7.min.js"></script>
     <script type="text/javascript" src="./../javascripts/ematrica-app.js"></script>
-    
 
-    <script id="vignetteTemplate" type="text/template7">
-        <ul class="book-list">
-            {{#each vignetteList}}
-            <li class="vignette-type-list-item" data-vignette-id="{{vignetteId}}">
-                <div class="card demo-card-header-pic">
-                    <div class="card-content card-content-padding book">
-                        <div class="book-header">
-                            
-                            <strong class="title">{{vignetteTitle}}</strong><br />
-                            <span class="price">{{vignettePrice}} Ft</span>
-                            <!--<span class="details"><a class="book-link" href="/bookdetails/" data-vignette-id="{{vignetteId}}">Details &raquo;</a></span>-->
+    <script id="contentTemplate" type="text/template7">
+        <div class="list">
+                <ul>
+                  <li>
+                    <a href="javascript:barionMarket.getVehicle()" class="item-link item-content">
+                      <div class="item-media"><i class="icon icon-f7"></i></div>
+                      <div class="item-inner">
+                        <div class="item-title">
+                          <div class="item-header">Vehicle</div>
+                          {{licensePlate}}
                         </div>
-                    </div>
-                </div>
-            </li>
-            {{/each}}
-        </ul>
-    </script>
-    
-    <script id="detailsTemplate" type="text/template7">
-        <div class="card demo-card-header-pic">
-            <div class="card-content card-content-padding book">
-                <div class="book-header">
-                    <img class="book-cover" src="{{bookImage}}" width="80" height="120" />
-                    <strong class="title">{{bookTitle}}</strong><br />
-                    <span class="author">{{bookAuthor}}</span>
-                    <div class="rating">
-                        <small>Rating: <b>{{bookRating}}</b> <i>({{bookReviews}} reviews)</i></small><br />
-                        <span class="icon icon-star-full"></span>
-                        <span class="icon icon-star-full"></span>
-                        <span class="icon icon-star-full"></span>
-                        <span class="icon icon-star-full"></span>
-                        <span class="icon icon-star-half"></span>
-                    </div>
-                    <span class="price">{{bookPrice}} Ft</span>
-                </div>
-                <div class="titlebar">
-                    <span>DETAILS</span>
-                </div>
-                <div class="book-details">
-                    <ul>
-                        <li>Publisher: <b>{{bookPublisher}}</b></li>
-                        <li>Media type: <b>{{bookType}}</b></li>
-                        <li>ISBN: <b>{{bookISBN}}</b></li>
-                        <li>Availability: <b>{{bookAvailability}}</b></li>
-                    </ul>
-                </div>
-                <div class="titlebar">
-                    <span>SUMMARY</span>
-                </div>
-                <div class="book-summary">{{bookSummary}}</div>
-            </div>
-        </div>
-        <div class="block">
-            <input type="button" id="setShippingButton" class="col button button-big" value="Continue to shipping address" data-book-id="{{bookID}}" />
-        </div>
-    </script>
-
-    <script id="summaryTemplate" type="text/template7">
-        <div class="card demo-card-header-pic">
-            <div class="card-content card-content-padding book">
-                
-                <div class="titlebar">
-                    <span>VEHICLE</span>
-                </div>
-                <div class="book-details">
-                    <ul>
-                        <li>Licenseplate: <b>{{licensePlate}}</b></li>
-                        <li>Type: <b>{{type}}</b></li>
-                        <li>Country: <b>{{countryCode}}</b></li>
-                        </ul>
-                    <div class="block">
-                        <input type="button" id="changeVehicleButton" class="col button button-big hidden" value="Change vehicle" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="block">
-            <input type="button" id="selectVignetteButton" class="col button button-big hidden" value="Select vignette" data-vignette-id="{{vignetteId}}" />
-        </div>
-    </script>
-
-    <script id="timeTemplate" type="text/template7">
-        
-        <div class="card demo-card-header-pic">
-            <div class="card-content card-content-padding">
-                
-                    <div class="book-details">
-                            <ul>
-                                <li>Title: <b>{{productData.vignette.title}}</b></li>
-                                <li>Time: <b>{{productData.vignette.time}}</b></li>
-                                </ul>
-                            
+                        <div class="item-after">Edit</div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <a id="showVignetteTypes" class="item-link item-content">
+                      <div class="item-media"><i class="icon icon-f7"></i></div>
+                      <div class="item-inner">
+                        <div class="item-title">
+                          <div class="item-header">Vignette type</div>
+                          {{selectedVignette}}
                         </div>
+                        <div class="item-after">Edit</div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                        <a class="item-link item-content" >
+                          <div class="item-media"><i class="icon icon-f7"></i></div>
+                          <div class="item-inner">
+                            <div class="item-title">
+                              <div class="item-header">Date of validity</div>
+                              
+                              <div class="item-input-wrap">
+                                    <input type="text" placeholder="Select date" readonly="readonly" id="demo-calendar-modal"/>
+                                  </div>
+                            </div>
+                            <div class="item-after">Edit</div>
+                          </div>
+                        </a>
+                      </li>
+                </ul>
             </div>
-            <div class="block block-strong no-padding">
-                <div id="demo-calendar-inline-container"></div>
-              </div>
-        </div>
-        
-        <div class="block">
-            <input type="button" id="buyVignetteButton" class="col button button-big hidden" value="Buy with Barion" data-vignette-id="{{productData.vignetteId}}" />
-        </div>
-    </script>
+            <input type="submit" class="button" id="payWithBarionButton" value="Buy with Barion">
+        </script>
 
-    <script id="redirectTemplate" type="text/template7">
-        <div class="redirect-template">
-        <div class="loading">
-            <img class="loading-icon" src="./../img/loading.gif" alt="Loading" />
-            <br>
-            Checking payment...
-        </div>
-    </div>
-    </script>
+        <script id="vignetteTypesTemplate" type="text/template7">
+            <div class="list">
+                    <div class="list-group">
+                      <ul>
+                        <li class="list-group-title">Highway vignette</li>
+                        {{#each highways}}
+                        <li id="selectVignetteType" data-vignette-id={{productId}}>
+                          <div class="item-content">
+                            <div class="item-inner">
+                              <div class="item-title">{{productDescription}}</div>
+                            </div>
+                          </div>
+                        </li>
+                        {{/each}}
+                      </ul>
+                    </div>
+                    <div class="list-group">
+                      <ul>
+                        <li class="list-group-title">Yearly county</li>
+                        {{#each yearlyCounty}}
+                        <li id="selectVignetteType" data-vignette-id={{productId}}>
+                          <div class="item-content">
+                            <div class="item-inner">
+                              <div class="item-title">{{productCounty}}</div>
+                            </div>
+                          </div>
+                        </li>
+                        {{/each}}
+                      </ul>
+                    </div>
+                  </div>
+        </script>
+    
 </body>
 </html>

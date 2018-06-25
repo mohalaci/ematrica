@@ -46,31 +46,31 @@ html.device-android .statusbar {
             background: url("data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D'12'%20height%3D'20'%20viewBox%3D'0%200%2012%2020'%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cpath%20d%3D'M.18261596%209.4221638c.0352203-.05148305.07573462-.10050698.1215468-.14631917L9.1425872.4374202c.5830904-.58309038%201.52656832-.5849888%202.11643872.00488163.5857864.58578644.591222%201.53009836.0048816%202.11643873L3.82594417%209.9967039l7.43188553%207.4318855c.5830904.5830904.5849888%201.5265683-.0048817%202.1164387-.5857864.5857865-1.5300983.591222-2.11643868.0048816L.2980849%2010.7114853c-.3526746-.3526746-.3939974-.89699-.11546894-1.2893215z'%20fill%3D'%23ffffff'%20fill-rule%3D'evenodd'%2F%3E%3C%2Fsvg%3E") !important;
         }
 
-.book-list {
+.vehicle-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-.book-list .book-list-item .book {
+.vehicle-list .vehicle-list-item .vehicle {
     min-height: 80px;
 }
 
-.book-list .book-list-item .book .book-header {
+.vehicle-list .vehicle-list-item .vehicle .vehicle-header {
     min-height: 80px;
 }
 
-    .book-list .book-list-item .book .book-header .title {
+    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .title {
         font-size: 15px;
         line-height: 15px;
     }
 
-    .book-list .book-list-item .book .book-header img.book-cover {
+    .vehicle-list .vehicle-list-item .vehicle .vehicle-header img.vehicle-cover {
         width: 56px;
         height: 80px;
     }
 
-    .book-list .book-list-item .book .book-header .price {
+    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .price {
         position: absolute;
         font-size: 15px;
         font-weight: 700;
@@ -82,7 +82,7 @@ html.device-android .statusbar {
         background: transparent;
     }
 
-    .book-list .book-list-item .book .book-header .details {
+    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details {
         position: absolute;
         font-size: 17px;
         font-weight: 700;
@@ -93,48 +93,48 @@ html.device-android .statusbar {
         background: #f2f2f2;
     }
 
-        .book-list .book-list-item .book .book-header .details a {
+        .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details a {
             color: #1A80BB;
         }
     
-.book .book-header {
+.vehicle .vehicle-header {
     display: block;
     position: relative;
     min-height: 120px;
 }
 
-    .book .book-header img.book-cover {
+    .vehicle .vehicle-header img.vehicle-cover {
         float: left;
         margin: 0 10px 15px 0;
         width: 90px;
         height: 120px;
     }
 
-    .book .book-header .title {
+    .vehicle .vehicle-header .title {
         font-size: 17px;
         text-transform: uppercase;
     }
 
-    .book .book-header .author {
+    .vehicle .vehicle-header .author {
         font-size: 13px;
     }
 
-    .book .book-header .rating {
+    .vehicle .vehicle-header .rating {
         position: absolute;
         left: 100px;
         bottom: 2px;
     }
 
-        .book .book-header .rating small {
+        .vehicle .vehicle-header .rating small {
             font-size: 11px;
         }
 
-        .book .book-header .rating .icon {
+        .vehicle .vehicle-header .rating .icon {
             color: #fa9000;
             font-size: 15px;
         }
 
-    .book .book-header .price {
+    .vehicle .vehicle-header .price {
         position: absolute;
         font-size: 17px;
         font-weight: 700;
@@ -145,7 +145,7 @@ html.device-android .statusbar {
         background: #1A80BB;
     }
 
-.book .titlebar {
+.vehicle .titlebar {
     background: #f8f8f8;
     padding: 4px 8px;
     font-size: 11px;
@@ -156,18 +156,18 @@ html.device-android .statusbar {
     clear: both;
 }
 
-.book .book-details ul {
+.vehicle .vehicle-details ul {
     list-style-type: none;
     margin: 0 0 15px 0;
     padding: 0 15px;
 }
 
-    .book .book-details ul li b {
+    .vehicle .vehicle-details ul li b {
         display: inline-block;
         float: right;
     }
 
-.book .book-summary {
+.vehicle .vehicle-summary {
     font-size: 13px;
     padding: 0 15px;
 }
@@ -211,3 +211,23 @@ html.device-android .statusbar {
     width: 64px;
     height: 64px;
 }
+
+.icon-f7 {
+    background: #EE350F;
+    color: #fff !important;
+    border-radius: 50%;
+    text-align: center;
+  }
+  .icon-f7:before {
+    content: '7';
+  }
+  .ios .icon-f7 {
+    width: 29px;
+    height: 29px;
+    line-height: 29px;
+  }
+  .md .icon-f7 {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+  }

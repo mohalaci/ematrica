@@ -25,11 +25,12 @@ function getProductsByVehicleType(selectedVehicleType, callback){
                     callback(err);
                 }
             } else {
-                console.log("item:");
-                console.log(item);
+                //console.log("item:");
+                //console.log(item);
                 var data = {
                     productId: item.productId,
                     productName: item.productName,
+                    productCounty: item.productCounty,
                     productType: item.productType,
                     productDescription: item.productDescription,
                     productUnit: item.productUnit,
@@ -114,7 +115,11 @@ function initProductsIfNotExist(){
                     isExists = true;
                 }
             }
-            console.log("initdata");
+        if (isExists){
+            console.log("drop old products table");
+            dBase.collection("products").remove({});
+            isExists = false;
+        }
         if (!isExists){
             console.log("isExists is false;");
             //dBase.createCollection("products");
@@ -146,7 +151,158 @@ function initProductsIfNotExist(){
                 productUnitPrice: 42980,
                 productCurrency: "HUF"
             },{
-                productId: "D1-04",
+                productId: "D1-04-01",
+                productCounty: "Baranya",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-02",
+                productCounty: "Borsod-Abaúj-Zemplén",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-03",
+                productCounty: "Bács-Kiskun",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-04",
+                productCounty: "Csongrád",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-05",
+                productCounty: "Fejér",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-06",
+                productCounty: "Győr-Moson-Sopron",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-07",
+                productCounty: "Heves",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-08",
+                productCounty: "Hajdú-Bihar",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-09",
+                productCounty: "Komárom-Esztergom",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-10",
+                productCounty: "Pest",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-11",
+                productCounty: "Somogy",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-12",
+                productCounty: "Szabolcs-Szatmár-Bereg",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-13",
+                productCounty: "Tolna",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-14",
+                productCounty: "Vas",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-15",
+                productCounty: "Veszprém",
+                productName: "Éves megyei matrica",
+                productType: "D1",
+                productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
+                productDescription: "D1 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "D1-04-16",
+                productCounty: "Zala",
                 productName: "Éves megyei matrica",
                 productType: "D1",
                 productAvailableCategory: ["CAR", "TRAILER", "MOTOR"],
@@ -182,7 +338,158 @@ function initProductsIfNotExist(){
                 productUnitPrice: 42980,
                 productCurrency: "HUF"
             },{
-                productId: "D2-04",
+                productId: "D2-04-01",
+                productCounty: "Baranya",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-02",
+                productCounty: "Borsod-Abaúj-Zemplén",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-03",
+                productCounty: "Bács-Kiskun",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-04",
+                productCounty: "Csongrád",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-05",
+                productCounty: "Fejér",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-06",
+                productCounty: "Győr-Moson-Sopron",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-07",
+                productCounty: "Heves",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-08",
+                productCounty: "Hajdú-Bihar",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-09",
+                productCounty: "Komárom-Esztergom",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-09",
+                productCounty: "Pest",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-10",
+                productCounty: "Somogy",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-11",
+                productCounty: "Szabolcs-Szatmár-Bereg",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-12",
+                productCounty: "Tolna",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-13",
+                productCounty: "Vas",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-14",
+                productCounty: "Veszprém",
+                productName: "Éves megyei matrica",
+                productType: "D2",
+                productAvailableCategory: ["TRUCK", "VAN"],
+                productDescription: "D2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 10000,
+                productCurrency: "HUF"
+            },{
+                productId: "D2-04-15",
+                productCounty: "Zala",
                 productName: "Éves megyei matrica",
                 productType: "D2",
                 productAvailableCategory: ["TRUCK", "VAN"],
@@ -218,7 +525,158 @@ function initProductsIfNotExist(){
                 productUnitPrice: 42980,
                 productCurrency: "HUF"
             },{
-                productId: "U-04",
+                productId: "U-04-01",
+                productCounty: "Baranya",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-02",
+                productCounty: "Borsod-Abaúj-Zemplén",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-03",
+                productCounty: "Bács-Kiskun",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-04",
+                productCounty: "Csongrád",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-05",
+                productCounty: "Fejér",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-06",
+                productCounty: "Győr-Moson-Sopron",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-07",
+                productCounty: "Heves",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-08",
+                productCounty: "Hajdú-Bihar",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-09",
+                productCounty: "Komárom-Esztergom",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-09",
+                productCounty: "Pest",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-10",
+                productCounty: "Somogy",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-11",
+                productCounty: "Szabolcs-Szatmár-Bereg",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-12",
+                productCounty: "Tolna",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-13",
+                productCounty: "Vas",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-14",
+                productCounty: "Veszprém",
+                productName: "Éves megyei matrica",
+                productType: "U",
+                productAvailableCategory: ["TRAILER"],
+                productDescription: "U - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "U-04-15",
+                productCounty: "Zala",
                 productName: "Éves megyei matrica",
                 productType: "U",
                 productAvailableCategory: ["TRAILER"],
@@ -254,7 +712,158 @@ function initProductsIfNotExist(){
                 productUnitPrice: 199975,
                 productCurrency: "HUF"
             },{
-                productId: "B2-04",
+                productId: "B2-04-01",
+                productCounty: "Baranya",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-02",
+                productCounty: "Borsod-Abaúj-Zemplén",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-03",
+                productCounty: "Bács-Kiskun",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-04",
+                productCounty: "Csongrád",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-05",
+                productCounty: "Fejér",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-06",
+                productCounty: "Győr-Moson-Sopron",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 5000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-07",
+                productCounty: "Heves",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-08",
+                productCounty: "Hajdú-Bihar",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-09",
+                productCounty: "Komárom-Esztergom",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-09",
+                productCounty: "Pest",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-10",
+                productCounty: "Somogy",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-11",
+                productCounty: "Szabolcs-Szatmár-Bereg",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-12",
+                productCounty: "Tolna",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-13",
+                productCounty: "Vas",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-14",
+                productCounty: "Veszprém",
+                productName: "Éves megyei matrica",
+                productType: "B2",
+                productAvailableCategory: ["BUS"],
+                productDescription: "B2 - Éves megyei matrica",
+                productUnit: "db",
+                productUnitPrice: 20000,
+                productCurrency: "HUF"
+            },{
+                productId: "B2-04-15",
+                productCounty: "Zala",
                 productName: "Éves megyei matrica",
                 productType: "B2",
                 productAvailableCategory: ["BUS"],

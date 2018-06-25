@@ -133,7 +133,7 @@ router.post('/start', urlencodedParser, function (req, res, next) {
         
                     product.forEach(i => {
         
-                        let name = i.productName;
+                        let name = i.productName + " - " + item.productCounty;
                         let desc = i.productDescription;
                         let quantity = 1;
                         let unit = i.productUnit;
