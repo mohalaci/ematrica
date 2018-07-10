@@ -11,7 +11,8 @@ var $data = {
     licensePlate: "",
     selectedVignette: "",
     selectedVignetteId: "",
-    dateOfValidity: ""
+    dateOfValidity: "",
+    image: ""
 }
 
 var $highwaysVignetteTypes = [];
@@ -325,8 +326,36 @@ function setVehicle(vehicle){
     };
     
     $data.licensePlate = $vehicle.licensePlate;
+    $data.image = getIconByVehicleCategory($vehicle.type);
     
     var content = $cContentTemplate($data);
     $$(".page-content").html(content);
     showBuyButton();
+}
+
+function getIconByVehicleCategory(category) {
+    var imageUrl = "/img/vehicle_car.png";
+    if (category != undefined){
+        switch (category.toLowerCase()){
+            case "bus":
+            imageUrl = "/img/vehicle_bus.png";
+            break;
+            case "car":
+            imageUrl = "/img/vehicle_car.png";
+            break;
+            case "van":
+            imageUrl = "/img/vehicle_van.png";
+            break;
+            case "trailer":
+            imageUrl = "/img/vehicle_trailer.png";
+            break;
+            case "motor":
+            imageUrl = "/img/vehicle_motor.png";
+            break;
+            default:
+            imageUrl = "/img/vehicle_car.png";
+            break;
+        }
+    }
+    return imageUrl;
 }
