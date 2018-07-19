@@ -1,5 +1,3 @@
-
-
 var $productData;
 var $vehicle = {
     licensePlate: "",
@@ -10,17 +8,34 @@ var $vehicle = {
 var $data = {
     licensePlate: "",
     selectedVignette: "",
+    selectedVignetteName: "",
     selectedVignetteId: "",
-    dateOfValidity: "",
-    image: ""
+    selectedVignetteValidity: "",
+    validityInfo: {
+        from: "",
+        to: ""
+    },
+    image: "",
+    getValidityRange: function () {
+        return this.validityInfo.from + " - " + this.validityInfo.to;
+    },
+    isComplete: function () {
+        return this.licensePlate != "" && this.selectedVignetteId != "" && this.validityInfo.from != "" && this.validityInfo.to != "";
+    }
 }
+var $dd;
 
 var $highwaysVignetteTypes = [];
 var $yearlyCountyVignetteTypes = [];
 
+var $cSelectVehicleTemplate;
+var $cSelectVignetteTemplate;
+var $cSelectValidityTemplate;
 var $cContentTemplate;
 var $cVignetteTypesTemplate;
 
+var $typeSelectVisible = false;
+var $dateSelectVisible = false;
 
 var app = new Framework7({
     root: '#app',
@@ -68,7 +83,7 @@ var app = new Framework7({
             page: 'redirect',
             on: {
                 pageInit: function(e, page){
-                    console.log("loasdfasfasdf");
+                    console.log("Loaded.");
                 }
             }
         },
@@ -95,8 +110,6 @@ var app = new Framework7({
     }
 });
 
-
-
 var $$ = Dom7;
 
 var barionMarket = new BarionMarket();
@@ -117,53 +130,121 @@ app.on('init', function () {
     }
 });
 
-function initMainPage(){
+function initMainPage() {
+    
     var content = $cContentTemplate($data);
-                        $$(".page-content").html(content);
-                        $$('#payWithBarionButton').hide();
-                        var calendarModal = app.calendar.create({
-                            inputEl: '#demo-calendar-modal',
-                            openIn: 'customModal',
-                            minDate: new Date(),
-                            maxDate: new Date(new Date().getFullYear(), 11, 31),
-                            header: true,
-                            footer: true,
-                            animate: true,
-                            dateFormat: 'MM dd yyyy',
-                            on: {
-                                change: function(calendar, data){
-                                    console.log(data);
-                                    $data.dateOfValidity = data;
-                                    showBuyButton();
-                                }
-                            }
-                          });   
+    $$(".page-content").html(content);
+    showNextStep();
+
+    var calendarModal = app.calendar.create({
+        inputEl: '#changeValidityButton',
+        openIn: 'customModal',
+        minDate: new Date(),
+        maxDate: new Date(new Date().getFullYear(), 11, 31),
+        header: true,
+        footer: true,
+        animate: true,
+        dateFormat: 'MM dd yyyy',
+        on: {
+            close: function (calendar) {
+                if (calendar.value != undefined) {
+                    var selectedDays = parseInt($data.selectedVignetteValidity);
+                    var startDate = new Date(calendar.value[0]);
+                    var endDate = new Date(calendar.value[0]);
+                    if (selectedDays == 365) {
+                        endDate = new Date((new Date().getFullYear() + 1) + "-01-31");
+                        $$("#changeValidityButton").removeClass("item-link");
+                        $$(".edit-validity").hide();
+                    } else {
+                        endDate.setDate(endDate.getDate() + selectedDays);
+                        $$("#changeValidityButton").addClass("item-link");
+                        $$(".edit-validity").show();
+                    }
+
+                    $data.validityInfo.from = startDate.toLocaleDateString("en-US");
+                    $data.validityInfo.to = endDate.toLocaleDateString("en-US");
+                    $$(".validity-range").text($data.getValidityRange());
+                    showNextStep();
+                }
+            },
+            open: function (calendar) {
+                if ($data.selectedVignetteValidity == "365") {
+                    calendar.close();
+                }
+            }
+        }
+    });   
 }
 
-function showBuyButton(){
-    if ($data.licensePlate != null && $data.selectedVignetteId != null && $data.dateOfValidity != null){
+function showNextStep() {
+    $$('#selectVignetteSection').hide();
+    $$('#selectValiditySection').hide();
+    $$('#payWithBarionButton').hide();
+
+    if ($data.licensePlate != null && $data.licensePlate != "") {
+        if ($typeSelectVisible) {
+            $$('#selectVignetteSection').show();
+        } else {
+            $typeSelectVisible = true;
+            $$('#selectVignetteSection').css("height", "0px").show().addClass("sliding").css("height", "56px");
+        }
+    }
+    if ($data.selectedVignetteId != null && $data.selectedVignetteId != "") {
+        if ($data.validityInfo.from == "" || $data.validityInfo.to == "") {
+            setDefaultValidity();
+        }
+        if ($dateSelectVisible) {
+            $$('#selectValiditySection').show();
+        } else {
+            $dateSelectVisible = true;
+            $$('#selectValiditySection').css("height", "0px").show().addClass("sliding").css("height", "56px");
+        }
+    }
+    if ($data.isComplete()) {
         $$('#payWithBarionButton').show();
     }
 }
 
-$$(document).on('DOMContentLoaded', function(){
+function setDefaultValidity() {
+    if ($data.selectedVignetteValidity == "365") {
+        var startDate = new Date();
+        var endDate = new Date((new Date().getFullYear() + 1) + "-01-31");
+        $data.validityInfo.from = startDate.toLocaleDateString("en-US");
+        $data.validityInfo.to = endDate.toLocaleDateString("en-US");
+        $$("#changeValidityButton").removeClass("item-link");
+        $$(".edit-validity").hide();
+    } else {
+        var selectedDays = parseInt($data.selectedVignetteValidity);
+        var startDate = new Date();
+        var endDate = new Date();
+        endDate.setDate(endDate.getDate() + selectedDays);
+        $data.validityInfo.from = startDate.toLocaleDateString("en-US");
+        $data.validityInfo.to = endDate.toLocaleDateString("en-US");
+        $$("#changeValidityButton").addClass("item-link");
+        $$(".edit-validity").show();
+    }
+    $$(".validity-range").text($data.getValidityRange());
+}
 
-    
+$$(document).on('DOMContentLoaded', function(){
 
     //pre-complie templates
     var vignetteTypesTemplate = $$('script#vignetteTypesTemplate').html();
     $cVignetteTypesTemplate = Template7.compile(vignetteTypesTemplate);
 
+    var selectVehicleTemplate = $$('script#selectVehicleTemplate').html();
+    var selectVignetteTemplate = $$('script#selectVignetteTemplate').html();
+    var selectValidityTemplate = $$('script#selectValidityTemplate').html();
+
+    Template7.registerPartial('selectVehicle', selectVehicleTemplate);
+    Template7.registerPartial('selectVignette', selectVignetteTemplate);
+    Template7.registerPartial('selectValidity', selectValidityTemplate);
+
     var contentTemplate = $$('script#contentTemplate').html();
     $cContentTemplate = Template7.compile(contentTemplate);
 
-    
     initMainPage();
-
-
     
-
-
     if ($$('html.device-ios').length > 0) {
         $$('body').scrollTop(20);
         $$('.view').scrollTop(20);
@@ -187,9 +268,12 @@ $$(document).on('DOMContentLoaded', function(){
         var idParams = selectedVignetteId.split("-");
         if (idParams != null && idParams.length > 2){
             $yearlyCountyVignetteTypes.forEach(function(item){
-                if (item.productId == selectedVignetteId){
+                if (item.productId == selectedVignetteId) {
                     $data.selectedVignette = item.productDescription + " " + item.productCounty;
-
+                    $data.selectedVignetteName = item.productType;
+                    $data.selectedVignetteValidity = item.productValidityDays;
+                    $data.validityInfo.from = "";
+                    $data.validityInfo.to = "";
                     return;
                 }
             })
@@ -197,12 +281,15 @@ $$(document).on('DOMContentLoaded', function(){
             $highwaysVignetteTypes.forEach(function(item){
                 if (item.productId == selectedVignetteId){
                     $data.selectedVignette = item.productDescription;
+                    $data.selectedVignetteName = item.productType;
+                    $data.selectedVignetteValidity = item.productValidityDays;
+                    $data.validityInfo.from = "";
+                    $data.validityInfo.to = "";
                     return;
                 }
             })
         }
-        //$data.vignetteType = selectedVignetteId;
-        console.log(selectedVignetteId);
+        
         mainView.router.back('/main/', { force: true });
     });
 
@@ -216,9 +303,7 @@ $$(document).on('DOMContentLoaded', function(){
                 position: 'center'
             }).open();
         }
-    });
-
-   
+    });   
 
     $$(document).on('click', ".backToList-link", function (e) {
         e.preventDefault();
@@ -232,6 +317,25 @@ $$(document).on('DOMContentLoaded', function(){
         return false;
     });
 });
+
+function createRandomVehicle() {
+    var t = "CAR";
+    var r = Math.floor(Math.random() * 5);
+    switch (r) {
+        case 0: t = "CAR"; break;
+        case 1: t = "BUS"; break;
+        case 2: t = "VAN"; break;
+        case 3: t = "MOTOR"; break;
+        case 4: t = "TRAILER"; break;
+    }
+    var v = {
+        licensePlate: "TST" + (100 + Math.floor(Math.random() * 900)),
+        countryCode: "HU",
+        category: t
+    };
+    setVehicle(JSON.stringify(v));
+}   
+     
 
 function getVignetteTypesForVehicleCategory(vehicleCategory, callback){
     if (vehicleCategory != undefined){
@@ -255,10 +359,8 @@ function getVignetteTypesForVehicleCategory(vehicleCategory, callback){
 function startPayment() {
     $$("#payWithBarionButton").addClass('disabled').attr('disabled', 'disabled');
     var vignette = $data.selectedVignetteId;
-    console.log(vignette);
     var vignettes = new Array();
     vignettes.push(vignette);
-    //vignettes.push(vignette);
     app.request({
         method: "POST",
         url: "/payment/start",
@@ -316,8 +418,7 @@ function redirectToBarionPaymentGateway(paymentId) {
     window.location.href = "https://test.barion.com/pay?id=" + paymentId;
 }
 
-function setVehicle(vehicle){
-    console.log(vehicle);
+function setVehicle(vehicle) {
     var s = JSON.parse(vehicle);
     $vehicle = {
         licensePlate: s.licensePlate,
@@ -330,7 +431,8 @@ function setVehicle(vehicle){
     
     var content = $cContentTemplate($data);
     $$(".page-content").html(content);
-    showBuyButton();
+    
+    showNextStep();
 }
 
 function getIconByVehicleCategory(category) {

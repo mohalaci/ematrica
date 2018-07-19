@@ -46,10 +46,10 @@ var BarionMarket = (function(){
 
     market.prototype.getVehicle = function(){
         var closeObj = { 'action': 'getVehicle'}
-        postToBarionHandler(closeObj)
+        postToBarionHandler(closeObj);
     }
     market.prototype.changeVehicle = function(){
-        this.getVehicle()
+        this.getVehicle();
     }
     return market;
 })();

@@ -3,17 +3,17 @@ html, body {
     background-color: #0097DB;
 }
 
-html.with-panel-left-cover .statusbar,
-.statusbar {
-    background: #0097DB !important;
-    transition: 250ms;
-}
+    html.with-panel-left-cover .statusbar,
+    .statusbar {
+        background: #0097DB !important;
+        transition: 250ms;
+    }
 
-html.device-android .statusbar {
-    margin-top: -20px;
-}
+    html.device-android .statusbar {
+        margin-top: -20px;
+    }
 
-#app, 
+#app,
 #app .view {
     background: #0097DB !important;
 }
@@ -52,51 +52,51 @@ html.device-android .statusbar {
     padding: 0;
 }
 
-.vehicle-list .vehicle-list-item .vehicle {
-    min-height: 80px;
-}
-
-.vehicle-list .vehicle-list-item .vehicle .vehicle-header {
-    min-height: 80px;
-}
-
-    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .title {
-        font-size: 15px;
-        line-height: 15px;
+    .vehicle-list .vehicle-list-item .vehicle {
+        min-height: 80px;
     }
 
-    .vehicle-list .vehicle-list-item .vehicle .vehicle-header img.vehicle-cover {
-        width: 56px;
-        height: 80px;
-    }
-
-    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .price {
-        position: absolute;
-        font-size: 15px;
-        font-weight: 700;
-        left: 66px;
-        right: auto;
-        bottom: 0;
-        color: #0097DB;
-        padding: 0;
-        background: transparent;
-    }
-
-    .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details {
-        position: absolute;
-        font-size: 17px;
-        font-weight: 700;
-        right: 0;
-        bottom: 0;
-        color: #0097DB;
-        padding: 2px 8px 0 8px;
-        background: #f2f2f2;
-    }
-
-        .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details a {
-            color: #0097DB;
+        .vehicle-list .vehicle-list-item .vehicle .vehicle-header {
+            min-height: 80px;
         }
-    
+
+            .vehicle-list .vehicle-list-item .vehicle .vehicle-header .title {
+                font-size: 15px;
+                line-height: 15px;
+            }
+
+            .vehicle-list .vehicle-list-item .vehicle .vehicle-header img.vehicle-cover {
+                width: 56px;
+                height: 80px;
+            }
+
+            .vehicle-list .vehicle-list-item .vehicle .vehicle-header .price {
+                position: absolute;
+                font-size: 15px;
+                font-weight: 700;
+                left: 66px;
+                right: auto;
+                bottom: 0;
+                color: #0097DB;
+                padding: 0;
+                background: transparent;
+            }
+
+            .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details {
+                position: absolute;
+                font-size: 17px;
+                font-weight: 700;
+                right: 0;
+                bottom: 0;
+                color: #0097DB;
+                padding: 2px 8px 0 8px;
+                background: #f2f2f2;
+            }
+
+                .vehicle-list .vehicle-list-item .vehicle .vehicle-header .details a {
+                    color: #0097DB;
+                }
+
 .vehicle .vehicle-header {
     display: block;
     position: relative;
@@ -184,10 +184,10 @@ html.device-android .statusbar {
     background: #ff4a00;
 }
 
-.card.card-fail .result {
-    color: #ffffff;
-    padding: 8px;
-}
+    .card.card-fail .result {
+        color: #ffffff;
+        padding: 8px;
+    }
 
 .card.card-success {
     background: #44af00;
@@ -197,7 +197,7 @@ html.device-android .statusbar {
         color: #ffffff;
         padding: 8px;
     }
-    
+
 .loading {
     text-align: center;
     font-size: 15px;
@@ -206,34 +206,92 @@ html.device-android .statusbar {
     color: #595959;
 }
 
-.loading .loading-icon {
-    margin: 15px auto;
-    width: 64px;
-    height: 64px;
-}
-
-.icon {
-    width: 29px;
-    height: 29px;
-    line-height: 29px;
-}
+    .loading .loading-icon {
+        margin: 15px auto;
+        width: 64px;
+        height: 64px;
+    }
 
 .icon-f7 {
     background: #EE350F;
     color: #fff !important;
     border-radius: 50%;
     text-align: center;
-  }
-  .icon-f7:before {
-    content: '7';
-  }
-  .ios .icon-f7 {
+}
+
+    .icon-f7:before {
+        content: '7';
+    }
+
+.ios .icon-f7 {
     width: 29px;
     height: 29px;
     line-height: 29px;
-  }
-  .md .icon-f7 {
+}
+
+.md .icon-f7 {
     width: 24px;
     height: 24px;
     line-height: 24px;
-  }
+}
+
+.sliding {
+    transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -webkit-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    overflow: hidden;
+}
+
+.list ul li .store-list-element {
+    height: 56px;
+}
+
+    .list ul li .store-list-element .vehicle-icon {
+        border-radius: 100%;
+        background: #0097db;
+        color: #ffffff;
+        padding: 4px;
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+        line-height: 32px;
+    }
+
+        .list ul li .store-list-element .vehicle-icon img {
+            width: auto;
+            height: auto;
+            max-width: 32px;
+            max-height: 32px;
+            line-height: 32px;
+            vertical-align: -6px;
+        }
+
+
+    .list ul li .store-list-element .type-icon {
+        border-radius: 100%;
+        background: #0097db;
+        color: #ffffff;
+        padding: 4px;
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+        font-weight: 700;
+        text-align: center;
+        line-height: 32px;
+    }
+
+    .list ul li .store-list-element .validity-icon {
+        border-radius: 100%;
+        background: #0097db;
+        color: #ffffff;
+        padding: 8px 4px 0px 4px;
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        line-height: 12px;
+    }

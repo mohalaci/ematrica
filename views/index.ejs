@@ -44,52 +44,63 @@
     <script type="text/javascript" src="./../javascripts/framework7/dist/js/framework7.min.js"></script>
     <script type="text/javascript" src="./../javascripts/ematrica-app.js"></script>
 
+    <script id="selectVehicleTemplate" type="text/template7">
+        <li id="selectVehicleSection">
+            <div id="changeVehicleButton" class="item-link item-content store-list-element">
+                <div class="item-media"><span class="vehicle-icon"><img src="{{image}}" class="icon"></img></span></div>
+                <div class="item-inner">
+                    <div class="item-title">
+                        <div class="item-header">Vehicle</div>
+                        {{licensePlate}}
+                    </div>
+                    <div class="item-after"></div>
+                </div>
+            </div>
+        </li>
+    </script>
+
+    <script id="selectVignetteTemplate" type="text/template7">
+        <li id="selectVignetteSection">
+            <div id="showVignetteTypes" class="item-link item-content store-list-element">
+                <div class="item-media"><span class="type-icon">{{selectedVignetteName}}</span></div>
+                <div class="item-inner">
+                    <div class="item-title">
+                        <div class="item-header">Vignette type</div>
+                        {{selectedVignette}}
+                    </div>
+                    <div class="item-after"></div>
+                </div>
+            </div>
+        </li>
+    </script>
+
+    <script id="selectValidityTemplate" type="text/template7">
+        <li id="selectValiditySection">
+            <div id="changeValidityButton" class="item-link item-content store-list-element" >
+                <div class="item-media"><span class="validity-icon">{{selectedVignetteValidity}}<br/>DAYS</span></div>
+                <div class="item-inner">
+                    <div class="item-title">
+                        <div class="item-title">
+                            <div class="item-header">Date of validity</div>
+                            <span class="validity-range">{{getValidityRange}}</span>
+                        </div>
+                    </div>
+                    <div class="item-after edit-validity"></div>
+                </div>
+            </div>
+        </li>
+    </script>
+
     <script id="contentTemplate" type="text/template7">
         <div class="list">
-                <ul>
-                  <li>
-                    <a href="javascript:barionMarket.getVehicle()" class="item-link item-content">
-                      <div class="item-media"><img src="{{image}}" class="icon"></img></div>
-                      <div class="item-inner">
-                        <div class="item-title">
-                          <div class="item-header">Vehicle</div>
-                          {{licensePlate}}
-                        </div>
-                        <div class="item-after">Edit</div>
-                      </div>
-                    </a>
-                  </li>
-                  <li>
-                    <a id="showVignetteTypes" class="item-link item-content">
-                      <div class="item-media"><img class="icon"></img></div>
-                      <div class="item-inner">
-                        <div class="item-title">
-                          <div class="item-header">Vignette type</div>
-                          {{selectedVignette}}
-                        </div>
-                        <div class="item-after">Edit</div>
-                      </div>
-                    </a>
-                  </li>
-                  <li>
-                        <a class="item-link item-content" >
-                          <div class="item-media"><i class="icon icon-f7"></i></div>
-                          <div class="item-inner">
-                            <div class="item-title">
-                              <div class="item-header">Date of validity</div>
-                              
-                              <div class="item-input-wrap">
-                                    <input type="text" placeholder="Select date" readonly="readonly" id="demo-calendar-modal"/>
-                                  </div>
-                            </div>
-                            <div class="item-after">Edit</div>
-                          </div>
-                        </a>
-                      </li>
-                </ul>
-            </div>
-            <input type="submit" class="button" id="payWithBarionButton" value="Buy with Barion">
-        </script>
+            <ul>
+                {{> "selectVehicle"}}
+                {{> "selectVignette"}}
+                {{> "selectValidity"}}
+            </ul>
+        </div>
+        <input type="submit" class="button" id="payWithBarionButton" value="Buy with Barion">
+    </script>
 
         <script id="vignetteTypesTemplate" type="text/template7">
             <div class="list">
