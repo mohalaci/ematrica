@@ -94,7 +94,7 @@ var app = new Framework7({
         },
         {
             path: '/failed/',
-            url: '/failed'
+            url: '/failed.html'
         }
     ],
     navbar: {
