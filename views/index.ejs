@@ -17,7 +17,7 @@
     <div id="app">
         <div class="statusbar"></div>
         <div class="view view-main">
-            
+
             <!-- PAGE 1 - List -->
             <div class="page" data-name="main">
                 <div class="navbar">
@@ -33,7 +33,6 @@
                 </div>
 
                 <div class="page-content">
-                    
                 </div>
             </div>
         </div>
@@ -91,6 +90,22 @@
         </li>
     </script>
 
+    <script id="vignettePriceTemplate" type="text/template7">
+        <li>
+            <div class="item-content store-list-element" >
+                <div class="item-media"><span class="type-icon">$</div>
+                <div class="item-inner">
+                    <div class="item-title">
+                        <div class="item-title">
+                            <div class="item-header">Price</div>
+                            <span class="item-price">{{selectedVignettePrice}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+
     <script id="contentTemplate" type="text/template7">
         <div class="list">
             <ul>
@@ -99,41 +114,57 @@
                 {{> "selectValidity"}}
             </ul>
         </div>
-        <input type="submit" class="button" id="payWithBarionButton" value="Buy with Barion">
+        <div class="list" id="priceContainer">
+            <ul>
+                {{> "vignettePrice"}}
+            </ul>
+        </div>
+        <div class="block">
+            <input type="submit" class="button button-fill" id="payWithBarionButton" value="Buy with Barion">
+        </div>
     </script>
 
-        <script id="vignetteTypesTemplate" type="text/template7">
-            <div class="list">
-                    <div class="list-group">
-                      <ul>
-                        <li class="list-group-title">Highway vignette</li>
-                        {{#each highways}}
-                        <li id="selectVignetteType" data-vignette-id={{productId}}>
-                          <div class="item-content">
-                            <div class="item-inner">
-                              <div class="item-title">{{productDescription}}</div>
-                            </div>
-                          </div>
-                        </li>
-                        {{/each}}
-                      </ul>
+    <script id="vignetteTypesTemplate" type="text/template7">
+        <div class="list">
+            <div class="list-group">
+                <ul>
+                <li class="list-group-title">Highway vignette</li>
+                {{#each highways}}
+                <li id="selectVignetteType" data-vignette-id={{productId}}>
+                    <div class="item-content">
+                    <div class="item-inner">
+                        <div class="item-title">{{productDescription}}</div>
                     </div>
-                    <div class="list-group">
-                      <ul>
-                        <li class="list-group-title">Yearly county</li>
-                        {{#each yearlyCounty}}
-                        <li id="selectVignetteType" data-vignette-id={{productId}}>
-                          <div class="item-content">
-                            <div class="item-inner">
-                              <div class="item-title">{{productCounty}}</div>
-                            </div>
-                          </div>
-                        </li>
-                        {{/each}}
-                      </ul>
                     </div>
-                  </div>
-        </script>
-    
+                </li>
+                {{/each}}
+                </ul>
+            </div>
+            <div class="list-group">
+                <ul>
+                <li class="list-group-title">Yearly county</li>
+                {{#each yearlyCounty}}
+                <li id="selectVignetteType" data-vignette-id={{productId}}>
+                    <div class="item-content">
+                    <div class="item-inner">
+                        <div class="item-title">{{productCounty}}</div>
+                    </div>
+                    </div>
+                </li>
+                {{/each}}
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <script id="loadingTemplate" type="text/template7">
+        <div class="block loading-container">
+            <div align="center">
+                <img src="/img/loading.gif" alt="LOADING" width="64" height="64" /><br>
+                <span>LOADING...</span>
+            </div>
+        </div>
+    </script>
+
 </body>
 </html>

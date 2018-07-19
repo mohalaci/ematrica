@@ -18,6 +18,18 @@ html, body {
     background: #0097DB !important;
 }
 
+.md #app .page {
+    background: #fafafa;
+}
+
+.md #app .list {
+    background: #ffffff;
+}
+
+.md #app .list-group-title {
+    background: #f2f2f2;
+}
+
 .statusbar-overlay {
     background: #0097DB !important;
 }
@@ -242,6 +254,19 @@ html, body {
     -ms-transition: all 0.5s ease-in-out;
     overflow: hidden;
 }
+
+.loading-container {
+    text-align: center;
+    height: 50%;
+    display: block;
+}
+
+    .loading-container div {
+        vertical-align: middle;
+        height: 20%;
+        display: inline-block;
+        margin-top: 30%;
+    }
 
 .list ul li .store-list-element {
     height: 56px;

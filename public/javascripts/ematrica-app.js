@@ -11,6 +11,7 @@ var $data = {
     selectedVignetteName: "",
     selectedVignetteId: "",
     selectedVignetteValidity: "",
+    selectedVignettePrice: "",
     validityInfo: {
         from: "",
         to: ""
@@ -23,14 +24,15 @@ var $data = {
         return this.licensePlate != "" && this.selectedVignetteId != "" && this.validityInfo.from != "" && this.validityInfo.to != "";
     }
 }
-var $dd;
 
+var $vignetteListOpen = false;
 var $highwaysVignetteTypes = [];
 var $yearlyCountyVignetteTypes = [];
 
 var $cSelectVehicleTemplate;
 var $cSelectVignetteTemplate;
 var $cSelectValidityTemplate;
+var $cLoadingTemplate;
 var $cContentTemplate;
 var $cVignetteTypesTemplate;
 
@@ -51,18 +53,20 @@ var app = new Framework7({
             url: '/',
             on: {
                 pageInit: function (e, page) {
-                    getVignetteTypesForVehicleCategory($vehicle.type, function callback(data){
-                        $highwaysVignetteTypes = data.highways;
-                        $yearlyCountyVignetteTypes = data.yearlyCounty;
-                        var content = $cVignetteTypesTemplate(
-                            {
-                                highways: data.highways,
-                                yearlyCounty: data.yearlyCounty
-                            });
-                        $$(".page-content").html(content);
-                    });
-                    
-                    
+                    $$(".page-content").html($cLoadingTemplate());
+                    if (!$vignetteListOpen) {
+                        getVignetteTypesForVehicleCategory($vehicle.type, function callback(data) {
+                            $highwaysVignetteTypes = data.highways;
+                            $yearlyCountyVignetteTypes = data.yearlyCounty;
+                            var content = $cVignetteTypesTemplate(
+                                {
+                                    highways: data.highways,
+                                    yearlyCounty: data.yearlyCounty
+                                });
+                            $$(".page-content").html(content);
+                            $vignetteListOpen = true;
+                        });
+                    }                    
                 }
             }
         },
@@ -136,10 +140,12 @@ function initMainPage() {
     $$(".page-content").html(content);
     showNextStep();
 
+    var today = new Date();
+
     var calendarModal = app.calendar.create({
         inputEl: '#changeValidityButton',
         openIn: 'customModal',
-        minDate: new Date(),
+        minDate: today.setDate(today.getDate() - 1),
         maxDate: new Date(new Date().getFullYear(), 11, 31),
         header: true,
         footer: true,
@@ -179,6 +185,7 @@ function initMainPage() {
 function showNextStep() {
     $$('#selectVignetteSection').hide();
     $$('#selectValiditySection').hide();
+    $$('#priceContainer').hide();
     $$('#payWithBarionButton').hide();
 
     if ($data.licensePlate != null && $data.licensePlate != "") {
@@ -195,9 +202,11 @@ function showNextStep() {
         }
         if ($dateSelectVisible) {
             $$('#selectValiditySection').show();
+            $$('#priceContainer').show();
         } else {
             $dateSelectVisible = true;
             $$('#selectValiditySection').css("height", "0px").show().addClass("sliding").css("height", "56px");
+            $$('#priceContainer').css("height", "0px").show().addClass("sliding").css("height", "56px");
         }
     }
     if ($data.isComplete()) {
@@ -229,16 +238,21 @@ function setDefaultValidity() {
 $$(document).on('DOMContentLoaded', function(){
 
     //pre-complie templates
+    var loadingTemplate = $$('script#loadingTemplate').html();
+    $cLoadingTemplate = Template7.compile(loadingTemplate);
+
     var vignetteTypesTemplate = $$('script#vignetteTypesTemplate').html();
     $cVignetteTypesTemplate = Template7.compile(vignetteTypesTemplate);
 
     var selectVehicleTemplate = $$('script#selectVehicleTemplate').html();
     var selectVignetteTemplate = $$('script#selectVignetteTemplate').html();
     var selectValidityTemplate = $$('script#selectValidityTemplate').html();
+    var vignettePriceTemplate = $$('script#vignettePriceTemplate').html();
 
     Template7.registerPartial('selectVehicle', selectVehicleTemplate);
     Template7.registerPartial('selectVignette', selectVignetteTemplate);
     Template7.registerPartial('selectValidity', selectValidityTemplate);
+    Template7.registerPartial('vignettePrice', vignettePriceTemplate);
 
     var contentTemplate = $$('script#contentTemplate').html();
     $cContentTemplate = Template7.compile(contentTemplate);
@@ -260,7 +274,7 @@ $$(document).on('DOMContentLoaded', function(){
     $$(document).on('click', "#resultButton", barionMarket.closePlugin);
     $$(document).on('click', "#exitButton", barionMarket.closePlugin);
     $$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
-    $$(document).on('click', "#changeVehicleButton", barionMarket.getVehicle);
+    $$(document).on('click', "#changeVehicleButton", /*barionMarket.getVehicle*/ createRandomVehicle);
 
     $$(document).on('click', "#selectVignetteType", function(){
         var selectedVignetteId = $$(this).attr("data-vignette-id");
@@ -274,6 +288,7 @@ $$(document).on('DOMContentLoaded', function(){
                     $data.selectedVignetteValidity = item.productValidityDays;
                     $data.validityInfo.from = "";
                     $data.validityInfo.to = "";
+                    $data.selectedVignettePrice = item.productUnitPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " + item.productCurrency;
                     return;
                 }
             })
@@ -285,11 +300,12 @@ $$(document).on('DOMContentLoaded', function(){
                     $data.selectedVignetteValidity = item.productValidityDays;
                     $data.validityInfo.from = "";
                     $data.validityInfo.to = "";
+                    $data.selectedVignettePrice = item.productUnitPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " + item.productCurrency;
                     return;
                 }
             })
         }
-        
+        $vignetteListOpen = false;
         mainView.router.back('/main/', { force: true });
     });
 
@@ -334,27 +350,25 @@ function createRandomVehicle() {
         category: t
     };
     setVehicle(JSON.stringify(v));
-}   
-     
+}        
 
 function getVignetteTypesForVehicleCategory(vehicleCategory, callback){
     if (vehicleCategory != undefined){
-    app.request({
-        method: "GET",
-        url: "/products?type="+vehicleCategory,
-        error: function (xhr, status, error) {
-            alert("ERROR: " + error + "\r\nStatus: " + status);
-        },
-        success: function (data, status, xhr) {
-            if (status == 200) {
-                callback(JSON.parse(data));
-            } else {
+        app.request({
+            method: "GET",
+            url: "/products?type="+vehicleCategory,
+            error: function (xhr, status, error) {
+                alert("ERROR: " + error + "\r\nStatus: " + status);
+            },
+            success: function (data, status, xhr) {
+                if (status == 200) {
+                    callback(JSON.parse(data));
+                } else {
+                }
             }
-        }
-    });
+        });
+    }
 }
-}
-
 
 function startPayment() {
     $$("#payWithBarionButton").addClass('disabled').attr('disabled', 'disabled');
