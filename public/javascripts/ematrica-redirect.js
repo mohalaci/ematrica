@@ -10,7 +10,7 @@ var app = new Framework7({
         },
         {
             path: '/failed/',
-            url: '/failed.html'
+            url: '/failed'
         }
     ],
     navbar: {
@@ -26,6 +26,8 @@ var app = new Framework7({
     },
     on: {
         pageInit(page) {
+            app.router.navigate('/failed/', { animate: false });
+            return;
             if (page.route.path != "/done/" && page.route.path != "/failed/") {
                 var query = page.route.query;
                 var _t = setTimeout(function() {

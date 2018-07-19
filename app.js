@@ -12,6 +12,7 @@ var networkLogRouter = require('./routes/networklog');
 var paymentRouter = require('./routes/payment');
 var redirectRouter = require('./routes/redirect');
 var doneRouter = require('./routes/done');
+var failRouter = require('./routes/failed');
 
 var app = express();
 // init scripts:
@@ -34,6 +35,7 @@ app.use('/callback', callbackRouter);
 app.use('/payment', paymentRouter);
 app.use('/redirect', redirectRouter);
 app.use('/done', doneRouter);
+app.use('/failed', failRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
