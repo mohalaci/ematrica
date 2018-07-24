@@ -274,7 +274,7 @@ $$(document).on('DOMContentLoaded', function(){
     $$(document).on('click', "#resultButton", barionMarket.closePlugin);
     $$(document).on('click', "#exitButton", barionMarket.closePlugin);
     $$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
-    $$(document).on('click', "#changeVehicleButton", /*barionMarket.getVehicle*/ createRandomVehicle);
+    $$(document).on('click', "#changeVehicleButton", barionMarket.getVehicle);
 
     $$(document).on('click', "#selectVignetteType", function(){
         var selectedVignetteId = $$(this).attr("data-vignette-id");
