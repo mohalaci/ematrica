@@ -443,6 +443,16 @@ function setVehicle(vehicle) {
     $data.licensePlate = $vehicle.licensePlate;
     $data.image = getIconByVehicleCategory($vehicle.type);
     
+    $data.selectedVignette = "";
+    $data.selectedVignetteName = "";
+    $data.selectedVignetteId = "";
+    $data.selectedVignetteValidity = "";
+    $data.selectedVignettePrice = "";
+    $data.validityInfo = {
+        from: "",
+        to: ""
+    };
+    
     var content = $cContentTemplate($data);
     $$(".page-content").html(content);
     
