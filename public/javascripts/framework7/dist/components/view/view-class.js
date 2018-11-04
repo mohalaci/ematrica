@@ -97,6 +97,7 @@ class View extends Framework7Class {
 
     return view;
   }
+
   destroy() {
     let view = this;
     const app = view.app;
@@ -131,10 +132,13 @@ class View extends Framework7Class {
 
     view = null;
   }
+
   init() {
     const view = this;
     if (view.params.router) {
       view.router.init();
+      view.$el.trigger('view:init', view);
+      view.emit('local::init viewInit', view);
     }
   }
 }

@@ -4,7 +4,6 @@ import Template7 from 'template7';
 import PathToRegexp from 'path-to-regexp'; // eslint-disable-line
 import Framework7Class from '../../utils/class';
 import Utils from '../../utils/utils';
-import Component from '../../utils/component';
 import History from '../../utils/history';
 import SwipeBack from './swipe-back';
 
@@ -89,28 +88,9 @@ class Router extends Framework7Class {
       },
     });
 
-    Utils.extend(router, {
-      // Load
-      forward,
-      load,
-      navigate,
-      refreshPage,
-      // Tab
-      tabLoad,
-      tabRemove,
-      // Modal
-      modalLoad,
-      modalRemove,
-      // Back
-      backward,
-      loadBack,
-      back,
-      // Clear history
-      clearPreviousHistory,
-    });
-
     return router;
   }
+
   animatableNavElements(newNavbarInner, oldNavbarInner) {
     const router = this;
     const dynamicNavbar = router.dynamicNavbar;
@@ -164,6 +144,7 @@ class Router extends Framework7Class {
 
     return { newNavEls, oldNavEls };
   }
+
   animateWithCSS(oldPage, newPage, oldNavbarInner, newNavbarInner, direction, callback) {
     const router = this;
     const dynamicNavbar = router.dynamicNavbar;
@@ -244,7 +225,7 @@ class Router extends Framework7Class {
     if (dynamicNavbar) {
       // Prepare Navbars
       animateNavbars(0);
-      Utils.nextTick(() => {
+      Utils.nextFrame(() => {
         // Add class, start animation
         animateNavbars(1);
         router.$el.addClass(routerTransitionClass);
@@ -254,6 +235,7 @@ class Router extends Framework7Class {
       router.$el.addClass(routerTransitionClass);
     }
   }
+
   animateWithJS(oldPage, newPage, oldNavbarInner, newNavbarInner, direction, callback) {
     const router = this;
     const dynamicNavbar = router.dynamicNavbar;
@@ -390,13 +372,14 @@ class Router extends Framework7Class {
         onDone();
         return;
       }
-      Utils.nextFrame(render);
+      Utils.requestAnimationFrame(render);
     }
 
     router.$el.addClass(routerTransitionClass);
 
-    Utils.nextFrame(render);
+    Utils.requestAnimationFrame(render);
   }
+
   animate(...args) {
     // Args: oldPage, newPage, oldNavbarInner, newNavbarInner, direction, callback
     const router = this;
@@ -408,6 +391,7 @@ class Router extends Framework7Class {
       router.animateWithCSS(...args);
     }
   }
+
   removeModal(modalEl) {
     const router = this;
     router.removeEl(modalEl);
@@ -417,22 +401,22 @@ class Router extends Framework7Class {
     const $tabEl = $(tabEl);
     $tabEl.html('');
   }
+
   removeNavbar(el) {
     const router = this;
     router.removeEl(el);
   }
+
   removePage(el) {
     const router = this;
     router.removeEl(el);
   }
+
   removeEl(el) {
     if (!el) return;
     const router = this;
     const $el = $(el);
     if ($el.length === 0) return;
-    if ($el[0].f7Component && $el[0].f7Component.$destroy) {
-      $el[0].f7Component.$destroy();
-    }
     $el.find('.tab').each((tabIndex, tabEl) => {
       $(tabEl).children().each((index, tabChild) => {
         if (tabChild.f7Component) {
@@ -441,6 +425,9 @@ class Router extends Framework7Class {
         }
       });
     });
+    if ($el[0].f7Component && $el[0].f7Component.$destroy) {
+      $el[0].f7Component.$destroy();
+    }
     if (!router.params.removeElements) {
       return;
     }
@@ -452,6 +439,7 @@ class Router extends Framework7Class {
       $el.remove();
     }
   }
+
   getPageEl(content) {
     const router = this;
     if (typeof content === 'string') {
@@ -466,6 +454,7 @@ class Router extends Framework7Class {
 
     return router.findElement('.page', router.tempDom);
   }
+
   findElement(stringSelector, container, notStacked) {
     const router = this;
     const view = router.view;
@@ -500,17 +489,12 @@ class Router extends Framework7Class {
     if (found && found.length > 1) return $(found[0]);
     return undefined;
   }
+
   flattenRoutes(routes = this.routes) {
     let flattenedRoutes = [];
     routes.forEach((route) => {
-      if ('routes' in route) {
-        const mergedPathsRoutes = route.routes.map((childRoute) => {
-          const cRoute = Utils.extend({}, childRoute);
-          cRoute.path = (`${route.path}/${cRoute.path}`).replace('///', '/').replace('//', '/');
-          return cRoute;
-        });
-        flattenedRoutes = flattenedRoutes.concat(route, this.flattenRoutes(mergedPathsRoutes));
-      } else if ('tabs' in route && route.tabs) {
+      let hasTabRoutes = false;
+      if ('tabs' in route && route.tabs) {
         const mergedPathsRoutes = route.tabs.map((tabRoute) => {
           const tRoute = Utils.extend({}, route, {
             path: (`${route.path}/${tabRoute.path}`).replace('///', '/').replace('//', '/'),
@@ -518,15 +502,31 @@ class Router extends Framework7Class {
             tab: tabRoute,
           });
           delete tRoute.tabs;
+          delete tRoute.routes;
           return tRoute;
         });
+        hasTabRoutes = true;
         flattenedRoutes = flattenedRoutes.concat(this.flattenRoutes(mergedPathsRoutes));
-      } else {
+      }
+      if ('routes' in route) {
+        const mergedPathsRoutes = route.routes.map((childRoute) => {
+          const cRoute = Utils.extend({}, childRoute);
+          cRoute.path = (`${route.path}/${cRoute.path}`).replace('///', '/').replace('//', '/');
+          return cRoute;
+        });
+        if (hasTabRoutes) {
+          flattenedRoutes = flattenedRoutes.concat(this.flattenRoutes(mergedPathsRoutes));
+        } else {
+          flattenedRoutes = flattenedRoutes.concat(route, this.flattenRoutes(mergedPathsRoutes));
+        }
+      }
+      if (!('routes' in route) && !('tabs' in route && route.tabs)) {
         flattenedRoutes.push(route);
       }
     });
     return flattenedRoutes;
   }
+
   // eslint-disable-next-line
   parseRouteUrl(url) {
     if (!url) return {};
@@ -542,6 +542,26 @@ class Router extends Framework7Class {
       path,
     };
   }
+
+  // eslint-disable-next-line
+  constructRouteUrl(route, { params, query } = {}) {
+    const { path } = route;
+    const toUrl = PathToRegexp.compile(path);
+    let url;
+    try {
+      url = toUrl(params || {});
+    } catch (error) {
+      throw new Error(`Framework7: error constructing route URL from passed params:\nRoute: ${path}\n${error.toString()}`);
+    }
+
+    if (query) {
+      if (typeof query === 'string') url += `?${query}`;
+      else url += `?${Utils.serializeObject(query)}`;
+    }
+
+    return url;
+  }
+
   findTabRoute(tabEl) {
     const router = this;
     const $tabEl = $(tabEl);
@@ -551,15 +571,16 @@ class Router extends Framework7Class {
     let foundTabRoute;
     flattenedRoutes.forEach((route) => {
       if (
-        route.parentPath === parentPath &&
-        route.tab &&
-        route.tab.id === tabId
+        route.parentPath === parentPath
+        && route.tab
+        && route.tab.id === tabId
       ) {
         foundTabRoute = route;
       }
     });
     return foundTabRoute;
   }
+
   findRouteByKey(key, value) {
     const router = this;
     const routes = router.routes;
@@ -574,6 +595,7 @@ class Router extends Framework7Class {
     });
     return matchingRoute;
   }
+
   findMatchingRoute(url) {
     if (!url) return undefined;
     const router = this;
@@ -603,6 +625,7 @@ class Router extends Framework7Class {
 
       if (matched) {
         keys.forEach((keyObj, index) => {
+          if (typeof keyObj.name === 'number') return;
           const paramValue = matched[index + 1];
           params[keyObj.name] = paramValue;
         });
@@ -626,6 +649,25 @@ class Router extends Framework7Class {
     });
     return matchingRoute;
   }
+
+  // eslint-disable-next-line
+  replaceRequestUrlParams(url = '', options = {}) {
+    let compiledUrl = url;
+    if (typeof compiledUrl === 'string'
+      && compiledUrl.indexOf('{{') >= 0
+      && options
+      && options.route
+      && options.route.params
+      && Object.keys(options.route.params).length
+    ) {
+      Object.keys(options.route.params).forEach((paramName) => {
+        const regExp = new RegExp(`{{${paramName}}}`, 'g');
+        compiledUrl = compiledUrl.replace(regExp, options.route.params[paramName] || '');
+      });
+    }
+    return compiledUrl;
+  }
+
   removeFromXhrCache(url) {
     const router = this;
     const xhrCache = router.cache.xhr;
@@ -635,6 +677,7 @@ class Router extends Framework7Class {
     }
     if (index !== false) xhrCache.splice(index, 1);
   }
+
   xhrRequest(requestUrl, options) {
     const router = this;
     const params = router.params;
@@ -642,36 +685,28 @@ class Router extends Framework7Class {
     let url = requestUrl;
 
     let hasQuery = url.indexOf('?') >= 0;
-    if (params.passRouteQueryToRequest &&
-      options &&
-      options.route &&
-      options.route.query &&
-      Object.keys(options.route.query).length
+    if (params.passRouteQueryToRequest
+      && options
+      && options.route
+      && options.route.query
+      && Object.keys(options.route.query).length
     ) {
       url += `${hasQuery ? '&' : '?'}${Utils.serializeObject(options.route.query)}`;
       hasQuery = true;
     }
 
-    if (params.passRouteParamsToRequest &&
-      options &&
-      options.route &&
-      options.route.params &&
-      Object.keys(options.route.params).length
+    if (params.passRouteParamsToRequest
+      && options
+      && options.route
+      && options.route.params
+      && Object.keys(options.route.params).length
     ) {
       url += `${hasQuery ? '&' : '?'}${Utils.serializeObject(options.route.params)}`;
       hasQuery = true;
     }
 
-    if (url.indexOf('{{') >= 0 &&
-      options &&
-      options.route &&
-      options.route.params &&
-      Object.keys(options.route.params).length
-    ) {
-      Object.keys(options.route.params).forEach((paramName) => {
-        const regExp = new RegExp(`{{${paramName}}}`, 'g');
-        url = url.replace(regExp, options.route.params[paramName] || '');
-      });
+    if (url.indexOf('{{') >= 0) {
+      url = router.replaceRequestUrlParams(url, options);
     }
     // should we ignore get params or not
     if (params.xhrCacheIgnoreGetParameters && url.indexOf('?') >= 0) {
@@ -722,12 +757,14 @@ class Router extends Framework7Class {
       });
     });
   }
+
   // Remove theme elements
   removeThemeElements(el) {
     const router = this;
     const theme = router.app.theme;
     $(el).find(`.${theme === 'md' ? 'ios' : 'md'}-only, .if-${theme === 'md' ? 'ios' : 'md'}`).remove();
   }
+
   templateLoader(template, templateUrl, options, resolve, reject) {
     const router = this;
     function compile(t) {
@@ -782,28 +819,34 @@ class Router extends Framework7Class {
       compile(template);
     }
   }
+
   modalTemplateLoader(template, templateUrl, options, resolve, reject) {
     const router = this;
     return router.templateLoader(template, templateUrl, options, (html) => {
       resolve(html);
     }, reject);
   }
+
   tabTemplateLoader(template, templateUrl, options, resolve, reject) {
     const router = this;
     return router.templateLoader(template, templateUrl, options, (html) => {
       resolve(html);
     }, reject);
   }
+
   pageTemplateLoader(template, templateUrl, options, resolve, reject) {
     const router = this;
     return router.templateLoader(template, templateUrl, options, (html, newOptions = {}) => {
       resolve(router.getPageEl(html), newOptions);
     }, reject);
   }
+
   componentLoader(component, componentUrl, options = {}, resolve, reject) {
     const router = this;
+    const { app } = router;
     const url = typeof component === 'string' ? component : componentUrl;
-    function compile(c) {
+    const compiledUrl = router.replaceRequestUrlParams(url, options);
+    function compile(componentOptions) {
       let context = options.context || {};
       if (typeof context === 'function') context = context.call(router);
       else if (typeof context === 'string') {
@@ -818,23 +861,26 @@ class Router extends Framework7Class {
         {},
         context,
         {
-          $,
-          $$: $,
-          $app: router.app,
-          $root: Utils.merge({}, router.app.data, router.app.methods),
           $route: options.route,
           $router: router,
-          $dom7: $,
           $theme: {
-            ios: router.app.theme === 'ios',
-            md: router.app.theme === 'md',
+            ios: app.theme === 'ios',
+            md: app.theme === 'md',
           },
         }
       );
-      const createdComponent = Component.create(c, extendContext);
+      const createdComponent = app.component.create(componentOptions, extendContext);
       resolve(createdComponent.el);
     }
-    if (url) {
+    let cachedComponent;
+    if (compiledUrl) {
+      router.cache.components.forEach((cached) => {
+        if (cached.url === compiledUrl) cachedComponent = cached.component;
+      });
+    }
+    if (compiledUrl && cachedComponent) {
+      compile(cachedComponent);
+    } else if (compiledUrl && !cachedComponent) {
       // Load via XHR
       if (router.xhr) {
         router.xhr.abort();
@@ -843,7 +889,12 @@ class Router extends Framework7Class {
       router
         .xhrRequest(url, options)
         .then((loadedComponent) => {
-          compile(Component.parse(loadedComponent));
+          const parsedComponent = app.component.parse(loadedComponent);
+          router.cache.components.push({
+            url: compiledUrl,
+            component: parsedComponent,
+          });
+          compile(parsedComponent);
         })
         .catch((err) => {
           reject();
@@ -853,24 +904,28 @@ class Router extends Framework7Class {
       compile(component);
     }
   }
+
   modalComponentLoader(rootEl, component, componentUrl, options, resolve, reject) {
     const router = this;
     router.componentLoader(component, componentUrl, options, (el) => {
       resolve(el);
     }, reject);
   }
+
   tabComponentLoader(tabEl, component, componentUrl, options, resolve, reject) {
     const router = this;
     router.componentLoader(component, componentUrl, options, (el) => {
       resolve(el);
     }, reject);
   }
+
   pageComponentLoader(routerEl, component, componentUrl, options, resolve, reject) {
     const router = this;
     router.componentLoader(component, componentUrl, options, (el, newOptions = {}) => {
       resolve(el, newOptions);
     }, reject);
   }
+
   getPageData(pageEl, navbarEl, from, to, route = {}, pageFromEl) {
     const router = this;
     const $pageEl = $(pageEl);
@@ -915,6 +970,7 @@ class Router extends Framework7Class {
     $pageEl[0].f7Page = page;
     return page;
   }
+
   // Callbacks
   pageCallback(callback, pageEl, navbarEl, from, to, options = {}, pageFromEl) {
     if (!pageEl) return;
@@ -992,8 +1048,8 @@ class Router extends Framework7Class {
           // eslint-disable-next-line
           $pageContent = $pageContent.filter((pageContentIndex, pageContentEl) => {
             return (
-              $(pageContentEl).parents('.tab:not(.tab-active)').length === 0 &&
-              !$(pageContentEl).is('.tab:not(.tab-active)')
+              $(pageContentEl).parents('.tab:not(.tab-active)').length === 0
+              && !$(pageContentEl).is('.tab:not(.tab-active)')
             );
           });
         }
@@ -1014,8 +1070,8 @@ class Router extends Framework7Class {
         // eslint-disable-next-line
         $pageContent = $pageContent.filter((pageContentIndex, pageContentEl) => {
           return (
-            $(pageContentEl).parents('.tab:not(.tab-active)').length === 0 &&
-            !$(pageContentEl).is('.tab:not(.tab-active)')
+            $(pageContentEl).parents('.tab:not(.tab-active)').length === 0
+            && !$(pageContentEl).is('.tab:not(.tab-active)')
           );
         });
       }
@@ -1031,9 +1087,13 @@ class Router extends Framework7Class {
 
     if (callback === 'beforeRemove') {
       detachEvents();
+      if ($pageEl[0].f7Page && $pageEl[0].f7Page.navbarEl) {
+        delete $pageEl[0].f7Page.navbarEl.f7Page;
+      }
       $pageEl[0].f7Page = null;
     }
   }
+
   saveHistory() {
     const router = this;
     router.view.history = router.history;
@@ -1041,6 +1101,7 @@ class Router extends Framework7Class {
       window.localStorage[`f7router-${router.view.id}-history`] = JSON.stringify(router.history);
     }
   }
+
   restoreHistory() {
     const router = this;
     if (router.params.pushState && window.localStorage[`f7router-${router.view.id}-history`]) {
@@ -1048,12 +1109,52 @@ class Router extends Framework7Class {
       router.view.history = router.history;
     }
   }
+
   clearHistory() {
     const router = this;
     router.history = [];
     if (router.view) router.view.history = [];
     router.saveHistory();
   }
+
+  updateCurrentUrl(newUrl) {
+    const router = this;
+    // Update history
+    if (router.history.length) {
+      router.history[router.history.length - 1] = newUrl;
+    } else {
+      router.history.push(newUrl);
+    }
+
+    // Update current route params
+    const { query, hash, params, url, path } = router.parseRouteUrl(newUrl);
+    if (router.currentRoute) {
+      Utils.extend(router.currentRoute, {
+        query,
+        hash,
+        params,
+        url,
+        path,
+      });
+    }
+
+    if (router.params.pushState) {
+      const pushStateRoot = router.params.pushStateRoot || '';
+      History.replace(
+        router.view.id,
+        {
+          url: newUrl,
+        },
+        pushStateRoot + router.params.pushStateSeparator + newUrl
+      );
+    }
+
+    // Save History
+    router.saveHistory();
+
+    router.emit('routeUrlUpdate', router.currentRoute, router);
+  }
+
   init() {
     const router = this;
     const { app, view } = router;
@@ -1061,8 +1162,8 @@ class Router extends Framework7Class {
     // Init Swipeback
     if ("universal" !== 'desktop') {
       if (
-        (view && router.params.iosSwipeBack && app.theme === 'ios') ||
-        (view && router.params.mdSwipeBack && app.theme === 'md')
+        (view && router.params.iosSwipeBack && app.theme === 'ios')
+        || (view && router.params.mdSwipeBack && app.theme === 'md')
       ) {
         SwipeBack(router);
       }
@@ -1076,7 +1177,15 @@ class Router extends Framework7Class {
     let initUrl = router.params.url;
     let documentUrl = document.location.href.split(document.location.origin)[1];
     let historyRestored;
-    if (!router.params.pushState || !router.params.pushStateOnLoad) {
+    const { pushState, pushStateOnLoad, pushStateSeparator, pushStateAnimateOnLoad } = router.params;
+    let { pushStateRoot } = router.params;
+    if (window.cordova && pushState && !pushStateSeparator && !pushStateRoot && document.location.pathname.indexOf('index.html')) {
+      // eslint-disable-next-line
+      console.warn('Framework7: wrong or not complete pushState configuration, trying to guess pushStateRoot');
+      pushStateRoot = document.location.pathname.split('index.html')[0];
+    }
+
+    if (!pushState || !pushStateOnLoad) {
       if (!initUrl) {
         initUrl = documentUrl;
       }
@@ -1087,12 +1196,12 @@ class Router extends Framework7Class {
         initUrl += document.location.hash;
       }
     } else {
-      if (router.params.pushStateRoot && documentUrl.indexOf(router.params.pushStateRoot) >= 0) {
-        documentUrl = documentUrl.split(router.params.pushStateRoot)[1];
+      if (pushStateRoot && documentUrl.indexOf(pushStateRoot) >= 0) {
+        documentUrl = documentUrl.split(pushStateRoot)[1];
         if (documentUrl === '') documentUrl = '/';
       }
-      if (router.params.pushStateSeparator.length > 0 && documentUrl.indexOf(router.params.pushStateSeparator) >= 0) {
-        initUrl = documentUrl.split(router.params.pushStateSeparator)[1];
+      if (pushStateSeparator.length > 0 && documentUrl.indexOf(pushStateSeparator) >= 0) {
+        initUrl = documentUrl.split(pushStateSeparator)[1];
       } else {
         initUrl = documentUrl;
       }
@@ -1104,7 +1213,7 @@ class Router extends Framework7Class {
       } else if (History.state && History.state[view.id] && History.state[view.id].url === router.history[router.history.length - 1]) {
         initUrl = router.history[router.history.length - 1];
       } else {
-        router.history = [documentUrl.split(router.params.pushStateSeparator)[0] || '/', initUrl];
+        router.history = [documentUrl.split(pushStateSeparator)[0] || '/', initUrl];
       }
       if (router.history.length > 1) {
         historyRestored = true;
@@ -1200,7 +1309,7 @@ class Router extends Framework7Class {
           initial: true,
           pushState: false,
           history: false,
-          animate: router.params.pushStateAnimateOnLoad,
+          animate: pushStateAnimateOnLoad,
           once: {
             pageAfterIn() {
               if (router.history.length > 2) {
@@ -1215,13 +1324,14 @@ class Router extends Framework7Class {
         router.saveHistory();
       }
     }
-    if (initUrl && router.params.pushState && router.params.pushStateOnLoad && (!History.state || !History.state[view.id])) {
+    if (initUrl && pushState && pushStateOnLoad && (!History.state || !History.state[view.id])) {
       History.initViewState(view.id, {
         url: initUrl,
       });
     }
     router.emit('local::init routerInit', router);
   }
+
   destroy() {
     let router = this;
 
@@ -1236,5 +1346,24 @@ class Router extends Framework7Class {
     router = null;
   }
 }
+
+// Load
+Router.prototype.forward = forward;
+Router.prototype.load = load;
+Router.prototype.navigate = navigate;
+Router.prototype.refreshPage = refreshPage;
+// Tab
+Router.prototype.tabLoad = tabLoad;
+Router.prototype.tabRemove = tabRemove;
+// Modal
+Router.prototype.modalLoad = modalLoad;
+Router.prototype.modalRemove = modalRemove;
+// Back
+Router.prototype.backward = backward;
+Router.prototype.loadBack = loadBack;
+Router.prototype.back = back;
+// Clear history
+Router.prototype.clearPreviousHistory = clearPreviousHistory;
+
 
 export default Router;

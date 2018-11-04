@@ -120,7 +120,7 @@ var barionMarket = new BarionMarket();
 var mainView = app.views.create('.view-main');
 mainView.router.allowPageChange = true;
 
-app.statusbar.setIosTextColor('white');
+app.statusbar.setTextColor('white');
 app.statusbar.setBackgroundColor('#0097DB');
 
 app.on('init', function () {

@@ -28,6 +28,8 @@ class Messagebar extends Framework7Class {
     const $el = $(messagebar.params.el);
     if ($el.length === 0) return messagebar;
 
+    if ($el[0].f7Messagebar) return $el[0].f7Messagebar;
+
     $el[0].f7Messagebar = messagebar;
 
     // Page and PageContent
@@ -138,35 +140,42 @@ class Messagebar extends Framework7Class {
 
     return messagebar;
   }
+
   focus() {
     const messagebar = this;
     messagebar.$textareaEl.focus();
     return messagebar;
   }
+
   blur() {
     const messagebar = this;
     messagebar.$textareaEl.blur();
     return messagebar;
   }
+
   clear() {
     const messagebar = this;
     messagebar.$textareaEl.val('').trigger('change');
     return messagebar;
   }
+
   getValue() {
     const messagebar = this;
     return messagebar.$textareaEl.val().trim();
   }
+
   setValue(value) {
     const messagebar = this;
     messagebar.$textareaEl.val(value).trigger('change');
     return messagebar;
   }
+
   setPlaceholder(placeholder) {
     const messagebar = this;
     messagebar.$textareaEl.attr('placeholder', placeholder);
     return messagebar;
   }
+
   resizePage() {
     const messagebar = this;
     const {
@@ -219,6 +228,7 @@ class Messagebar extends Framework7Class {
       }
     }
   }
+
   checkEmptyState() {
     const messagebar = this;
     const { $el, $textareaEl } = messagebar;
@@ -229,6 +239,7 @@ class Messagebar extends Framework7Class {
       $el.removeClass('messagebar-with-value');
     }
   }
+
   attachmentsCreate(innerHTML = '') {
     const messagebar = this;
     const $attachmentsEl = $(`<div class="messagebar-attachments">${innerHTML}</div>`);
@@ -239,6 +250,7 @@ class Messagebar extends Framework7Class {
     });
     return messagebar;
   }
+
   attachmentsShow(innerHTML = '') {
     const messagebar = this;
     messagebar.$attachmentsEl = messagebar.$el.find('.messagebar-attachments');
@@ -252,6 +264,7 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   attachmentsHide() {
     const messagebar = this;
     messagebar.$el.removeClass('messagebar-attachments-visible');
@@ -261,6 +274,7 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   attachmentsToggle() {
     const messagebar = this;
     if (messagebar.attachmentsVisible) {
@@ -270,6 +284,7 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   renderAttachment(attachment) {
     const messagebar = this;
     if (messagebar.params.renderAttachment) {
@@ -282,6 +297,7 @@ class Messagebar extends Framework7Class {
       </div>
     `;
   }
+
   renderAttachments() {
     const messagebar = this;
     let html;
@@ -296,6 +312,7 @@ class Messagebar extends Framework7Class {
       messagebar.$attachmentsEl.html(html);
     }
   }
+
   sheetCreate(innerHTML = '') {
     const messagebar = this;
     const $sheetEl = $(`<div class="messagebar-sheet">${innerHTML}</div>`);
@@ -306,6 +323,7 @@ class Messagebar extends Framework7Class {
     });
     return messagebar;
   }
+
   sheetShow(innerHTML = '') {
     const messagebar = this;
     messagebar.$sheetEl = messagebar.$el.find('.messagebar-sheet');
@@ -319,6 +337,7 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   sheetHide() {
     const messagebar = this;
     messagebar.$el.removeClass('messagebar-sheet-visible');
@@ -328,6 +347,7 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   sheetToggle() {
     const messagebar = this;
     if (messagebar.sheetVisible) {
@@ -337,19 +357,23 @@ class Messagebar extends Framework7Class {
     }
     return messagebar;
   }
+
   init() {
     const messagebar = this;
     messagebar.attachEvents();
     messagebar.checkEmptyState();
     return messagebar;
   }
+
   destroy() {
     const messagebar = this;
     messagebar.emit('local::beforeDestroy messagebarBeforeDestroy', messagebar);
     messagebar.$el.trigger('messagebar:beforedestroy', messagebar);
     messagebar.detachEvents();
-    messagebar.$el[0].f7Messagebar = null;
-    delete messagebar.$el[0].f7Messagebar;
+    if (messagebar.$el[0]) {
+      messagebar.$el[0].f7Messagebar = null;
+      delete messagebar.$el[0].f7Messagebar;
+    }
     Utils.deleteProps(messagebar);
   }
 }

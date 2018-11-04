@@ -6,6 +6,7 @@ import Support from '../../utils/support';
 class Range extends Framework7Class {
   constructor(app, params) {
     super(params, [app]);
+
     const range = this;
     const defaults = {
       el: null,
@@ -30,6 +31,8 @@ class Range extends Framework7Class {
     const $el = $(el);
     if ($el.length === 0) return range;
 
+    if ($el[0].f7Range) return $el[0].f7Range;
+
     const dataset = $el.dataset();
 
     ('step min max value').split(' ').forEach((paramName) => {
@@ -42,7 +45,6 @@ class Range extends Framework7Class {
         range.params[paramName] = dataset[paramName];
       }
     });
-
 
     if (!range.params.value) {
       if (typeof dataset.value !== 'undefined') range.params.value = dataset.value;
@@ -250,15 +252,15 @@ class Range extends Framework7Class {
       if (typeof range.previousValue !== 'undefined') {
         if (
           (
-            range.dual &&
-            (
-              range.previousValue[0] !== range.value[0] ||
-              range.previousValue[1] !== range.value[1]
+            range.dual
+            && (
+              range.previousValue[0] !== range.value[0]
+              || range.previousValue[1] !== range.value[1]
             )
-          ) ||
-          (
-            !range.dual &&
-            range.previousValue !== range.value
+          )
+          || (
+            !range.dual
+            && range.previousValue !== range.value
           )
         ) {
           range.$el.trigger('range:changed', range, range.value);
@@ -308,6 +310,7 @@ class Range extends Framework7Class {
 
     return range;
   }
+
   calcSize() {
     const range = this;
     const width = range.$el.outerWidth();
@@ -315,6 +318,7 @@ class Range extends Framework7Class {
     range.rangeWidth = width;
     range.knobWidth = range.knobs[0].outerWidth();
   }
+
   layout() {
     const range = this;
     const {
@@ -366,6 +370,7 @@ class Range extends Framework7Class {
       range.$el.removeClass('range-slider-max');
     }
   }
+
   setValue(newValue, byTouchMove) {
     const range = this;
     const { step, min, max } = range;
@@ -416,9 +421,11 @@ class Range extends Framework7Class {
     range.emit('local::change rangeChange', range, range.value);
     return range;
   }
+
   getValue() {
     return this.value;
   }
+
   init() {
     const range = this;
     range.calcSize();
@@ -426,6 +433,7 @@ class Range extends Framework7Class {
     range.attachEvents();
     return range;
   }
+
   destroy() {
     let range = this;
     range.$el.trigger('range:beforedestroy', range);

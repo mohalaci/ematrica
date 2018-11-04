@@ -54,7 +54,7 @@ class Picker extends Framework7Class {
     function onHtmlClick(e) {
       const $targetEl = $(e.target);
       if (picker.isPopover()) return;
-      if (!picker.opened) return;
+      if (!picker.opened || picker.closing) return;
       if ($targetEl.closest('[class*="backdrop"]').length) return;
       if ($inputEl && $inputEl.length > 0) {
         if ($targetEl[0] !== $inputEl[0] && $targetEl.closest('.sheet-modal').length === 0) {
@@ -97,11 +97,13 @@ class Picker extends Framework7Class {
 
     return picker;
   }
+
   initInput() {
     const picker = this;
     if (!picker.$inputEl) return;
     if (picker.params.inputReadOnly) picker.$inputEl.prop('readOnly', true);
   }
+
   resizeCols() {
     const picker = this;
     if (!picker.opened) return;
@@ -112,6 +114,7 @@ class Picker extends Framework7Class {
       }
     }
   }
+
   isPopover() {
     const picker = this;
     const { app, modal, params } = picker;
@@ -120,14 +123,15 @@ class Picker extends Framework7Class {
 
     if (!picker.inline && picker.inputEl) {
       if (params.openIn === 'popover') return true;
-      else if (app.device.ios) {
+      if (app.device.ios) {
         return !!app.device.ipad;
-      } else if (app.width >= 768) {
+      } if (app.width >= 768) {
         return true;
       }
     }
     return false;
   }
+
   formatValue() {
     const picker = this;
     const { value, displayValue } = picker;
@@ -136,6 +140,7 @@ class Picker extends Framework7Class {
     }
     return value.join(' ');
   }
+
   setValue(values, transition) {
     const picker = this;
     let valueIndex = 0;
@@ -151,10 +156,12 @@ class Picker extends Framework7Class {
       }
     }
   }
+
   getValue() {
     const picker = this;
     return picker.value;
   }
+
   updateValue(forceValues) {
     const picker = this;
     const newValue = forceValues || [];
@@ -190,6 +197,7 @@ class Picker extends Framework7Class {
       picker.$inputEl.trigger('change');
     }
   }
+
   initColumn(colEl, updateItems) {
     const picker = this;
     pickerColumn.call(picker, colEl, updateItems);
@@ -203,6 +211,7 @@ class Picker extends Framework7Class {
       picker.cols[index].destroy();
     }
   }
+
   renderToolbar() {
     const picker = this;
     if (picker.params.renderToolbar) return picker.params.renderToolbar.call(picker, picker);
@@ -242,6 +251,7 @@ class Picker extends Framework7Class {
 
     return onlyItems ? columnItemsHtml.trim() : columnHtml.trim();
   }
+
   renderInline() {
     const picker = this;
     const { rotateEffect, cssClass, toolbar } = picker.params;
@@ -257,6 +267,7 @@ class Picker extends Framework7Class {
 
     return inlineHtml;
   }
+
   renderSheet() {
     const picker = this;
     const { rotateEffect, cssClass, toolbar } = picker.params;
@@ -272,6 +283,7 @@ class Picker extends Framework7Class {
 
     return sheetHtml;
   }
+
   renderPopover() {
     const picker = this;
     const { rotateEffect, cssClass, toolbar } = picker.params;
@@ -291,6 +303,7 @@ class Picker extends Framework7Class {
 
     return popoverHtml;
   }
+
   render() {
     const picker = this;
     if (picker.params.render) return picker.params.render.call(picker);
@@ -300,10 +313,13 @@ class Picker extends Framework7Class {
     }
     return picker.renderInline();
   }
+
   onOpen() {
     const picker = this;
     const { initialized, $el, app, $inputEl, inline, value, params } = picker;
     picker.opened = true;
+    picker.closing = false;
+    picker.opening = true;
 
     // Init main events
     picker.attachResizeEvent();
@@ -312,8 +328,8 @@ class Picker extends Framework7Class {
     $el.find('.picker-column').each((index, colEl) => {
       let updateItems = true;
       if (
-        (!initialized && params.value) ||
-        (initialized && value)
+        (!initialized && params.value)
+        || (initialized && value)
       ) {
         updateItems = false;
       }
@@ -346,8 +362,10 @@ class Picker extends Framework7Class {
     }
     picker.emit('local::open pickerOpen', picker);
   }
+
   onOpened() {
     const picker = this;
+    picker.opening = false;
 
     if (picker.$el) {
       picker.$el.trigger('picker:opened', picker);
@@ -357,9 +375,12 @@ class Picker extends Framework7Class {
     }
     picker.emit('local::opened pickerOpened', picker);
   }
+
   onClose() {
     const picker = this;
     const app = picker.app;
+    picker.opening = false;
+    picker.closing = true;
 
     // Detach events
     picker.detachResizeEvent();
@@ -379,9 +400,11 @@ class Picker extends Framework7Class {
     }
     picker.emit('local::close pickerClose', picker);
   }
+
   onClosed() {
     const picker = this;
     picker.opened = false;
+    picker.closing = false;
 
     if (!picker.inline) {
       Utils.nextTick(() => {
@@ -402,6 +425,7 @@ class Picker extends Framework7Class {
     }
     picker.emit('local::closed pickerClosed', picker);
   }
+
   open() {
     const picker = this;
     const { app, opened, inline, $inputEl } = picker;
@@ -452,6 +476,7 @@ class Picker extends Framework7Class {
       picker.modal.open();
     }
   }
+
   close() {
     const picker = this;
     const { opened, inline } = picker;
@@ -467,6 +492,7 @@ class Picker extends Framework7Class {
       picker.modal.close();
     }
   }
+
   init() {
     const picker = this;
 
@@ -491,6 +517,7 @@ class Picker extends Framework7Class {
     }
     picker.emit('local::init pickerInit', picker);
   }
+
   destroy() {
     const picker = this;
     if (picker.destroyed) return;

@@ -56,13 +56,27 @@ class Popup extends Modal {
       const $target = $(target);
       if ($target.closest(popup.el).length === 0) {
         if (
-          popup.params &&
-          popup.params.closeByBackdropClick &&
-          popup.params.backdrop &&
-          popup.backdropEl &&
-          popup.backdropEl === target
+          popup.params
+          && popup.params.closeByBackdropClick
+          && popup.params.backdrop
+          && popup.backdropEl
+          && popup.backdropEl === target
         ) {
-          popup.close();
+          let needToClose = true;
+          popup.$el.nextAll('.popup.modal-in').each((index, popupEl) => {
+            const popupInstance = popupEl.f7Modal;
+            if (!popupInstance) return;
+            if (
+              popupInstance.params.closeByBackdropClick
+              && popupInstance.params.backdrop
+              && popupInstance.backdropEl === popup.backdropEl
+            ) {
+              needToClose = false;
+            }
+          });
+          if (needToClose) {
+            popup.close();
+          }
         }
       }
     }

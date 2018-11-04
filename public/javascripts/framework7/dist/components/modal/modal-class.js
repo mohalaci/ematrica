@@ -22,32 +22,39 @@ class Modal extends Framework7Class {
     modal.useModulesParams(defaults);
 
     modal.params = Utils.extend(defaults, params);
+    modal.opened = false;
 
     // Install Modules
     modal.useModules();
 
     return this;
   }
+
   onOpen() {
     const modal = this;
+    modal.opened = true;
     openedModals.push(modal);
     $('html').addClass(`with-modal-${modal.type.toLowerCase()}`);
     modal.$el.trigger(`modal:open ${modal.type.toLowerCase()}:open`, modal);
     modal.emit(`local::open modalOpen ${modal.type}Open`, modal);
   }
+
   onOpened() {
     const modal = this;
     modal.$el.trigger(`modal:opened ${modal.type.toLowerCase()}:opened`, modal);
     modal.emit(`local::opened modalOpened ${modal.type}Opened`, modal);
   }
+
   onClose() {
     const modal = this;
+    modal.opened = false;
     if (!modal.type || !modal.$el) return;
     openedModals.splice(openedModals.indexOf(modal), 1);
     $('html').removeClass(`with-modal-${modal.type.toLowerCase()}`);
     modal.$el.trigger(`modal:close ${modal.type.toLowerCase()}:close`, modal);
     modal.emit(`local::close modalClose ${modal.type}Close`, modal);
   }
+
   onClosed() {
     const modal = this;
     if (!modal.type || !modal.$el) return;
@@ -56,6 +63,7 @@ class Modal extends Framework7Class {
     modal.$el.trigger(`modal:closed ${modal.type.toLowerCase()}:closed`, modal);
     modal.emit(`local::closed modalClosed ${modal.type}Closed`, modal);
   }
+
   open(animateModal) {
     const modal = this;
     const app = modal.app;
@@ -109,15 +117,10 @@ class Modal extends Framework7Class {
       });
     }
 
-    // Emit open
-    /* eslint no-underscore-dangle: ["error", { "allow": ["_clientLeft"] }] */
-    modal._clientLeft = $el[0].clientLeft;
 
-    // Backdrop
-    if ($backdropEl) {
-      $backdropEl[animate ? 'removeClass' : 'addClass']('not-animated');
-      $backdropEl.addClass('backdrop-in');
-    }
+    /* eslint no-underscore-dangle: ["error", { "allow": ["_clientLeft"] }] */
+    // modal._clientLeft = $el[0].clientLeft;
+
     // Modal
     function transitionEnd() {
       if ($el.hasClass('modal-out')) {
@@ -127,19 +130,28 @@ class Modal extends Framework7Class {
       }
     }
     if (animate) {
-      $el
-        .animationEnd(() => {
-          transitionEnd();
-        });
-      $el
-        .transitionEnd(() => {
-          transitionEnd();
-        });
-      $el
-        .removeClass('modal-out not-animated')
-        .addClass('modal-in');
-      modal.onOpen();
+      Utils.nextFrame(() => {
+        if ($backdropEl) {
+          $backdropEl.removeClass('not-animated');
+          $backdropEl.addClass('backdrop-in');
+        }
+        $el
+          .animationEnd(() => {
+            transitionEnd();
+          });
+        $el
+          .transitionEnd(() => {
+            transitionEnd();
+          });
+        $el
+          .removeClass('modal-out not-animated')
+          .addClass('modal-in');
+        modal.onOpen();
+      });
     } else {
+      if ($backdropEl) {
+        $backdropEl.addClass('backdrop-in not-animated');
+      }
       $el.removeClass('modal-out').addClass('modal-in not-animated');
       modal.onOpen();
       modal.onOpened();
@@ -147,6 +159,7 @@ class Modal extends Framework7Class {
 
     return modal;
   }
+
   close(animateModal) {
     const modal = this;
     const $el = modal.$el;
@@ -164,8 +177,24 @@ class Modal extends Framework7Class {
 
     // backdrop
     if ($backdropEl) {
-      $backdropEl[animate ? 'removeClass' : 'addClass']('not-animated');
-      $backdropEl.removeClass('backdrop-in');
+      let needToHideBackdrop = true;
+      if (modal.type === 'popup') {
+        modal.$el.prevAll('.popup.modal-in').each((index, popupEl) => {
+          const popupInstance = popupEl.f7Modal;
+          if (!popupInstance) return;
+          if (
+            popupInstance.params.closeByBackdropClick
+            && popupInstance.params.backdrop
+            && popupInstance.backdropEl === modal.backdropEl
+          ) {
+            needToHideBackdrop = false;
+          }
+        });
+      }
+      if (needToHideBackdrop) {
+        $backdropEl[animate ? 'removeClass' : 'addClass']('not-animated');
+        $backdropEl.removeClass('backdrop-in');
+      }
     }
 
     // Modal
@@ -207,6 +236,7 @@ class Modal extends Framework7Class {
 
     return modal;
   }
+
   destroy() {
     const modal = this;
     if (modal.destroyed) return;

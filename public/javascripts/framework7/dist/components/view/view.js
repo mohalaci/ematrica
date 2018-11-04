@@ -45,8 +45,6 @@ export default {
       xhrCacheIgnoreGetParameters: false,
       xhrCacheDuration: 1000 * 60 * 10, // Ten minutes
       preloadPreviousPage: true,
-      uniqueHistory: false,
-      uniqueHistoryIgnoreGetParameters: false,
       allowDuplicateUrls: false,
       reloadPages: false,
       removeElements: true,
@@ -85,6 +83,9 @@ export default {
       // Delays
       iosPageLoadDelay: 0,
       materialPageLoadDelay: 0,
+      // Routes hooks
+      routesBeforeEnter: null,
+      routesBeforeLeave: null,
     },
   },
   static: {
@@ -141,4 +142,3 @@ export default {
     },
   },
 };
-

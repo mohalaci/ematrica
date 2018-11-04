@@ -1,4 +1,5 @@
 import $ from 'dom7';
+import IDate from './idate/index';
 import Utils from '../../utils/utils';
 import Framework7Class from '../../utils/class';
 
@@ -6,7 +7,22 @@ class Calendar extends Framework7Class {
   constructor(app, params = {}) {
     super(params, [app]);
     const calendar = this;
+
     calendar.params = Utils.extend({}, app.params.calendar, params);
+
+    if (calendar.params.calendarType === 'jalali') {
+      Object.keys(calendar.params.jalali).forEach((param) => {
+        if (!params[param]) {
+          calendar.params[param] = calendar.params.jalali[param];
+        }
+      });
+    }
+
+    if (calendar.params.calendarType === 'jalali') {
+      calendar.DateHandleClass = IDate;
+    } else {
+      calendar.DateHandleClass = Date;
+    }
 
     let $containerEl;
     if (calendar.params.containerEl) {
@@ -57,7 +73,7 @@ class Calendar extends Framework7Class {
     function onHtmlClick(e) {
       const $targetEl = $(e.target);
       if (calendar.isPopover()) return;
-      if (!calendar.opened) return;
+      if (!calendar.opened || calendar.closing) return;
       if ($targetEl.closest('[class*="backdrop"]').length) return;
       if ($inputEl && $inputEl.length > 0) {
         if ($targetEl[0] !== $inputEl[0] && $targetEl.closest('.sheet-modal, .calendar-modal').length === 0) {
@@ -115,7 +131,7 @@ class Calendar extends Framework7Class {
         touchCurrentX = touchStartX;
         touchStartY = e.type === 'touchstart' ? e.targetTouches[0].pageY : e.pageY;
         touchCurrentY = touchStartY;
-        touchStartTime = (new Date()).getTime();
+        touchStartTime = (new calendar.DateHandleClass()).getTime();
         percentage = 0;
         allowItemClick = true;
         isScrolling = undefined;
@@ -164,7 +180,7 @@ class Calendar extends Framework7Class {
         isTouched = false;
         isMoved = false;
 
-        touchEndTime = new Date().getTime();
+        touchEndTime = new calendar.DateHandleClass().getTime();
         if (touchEndTime - touchStartTime < 300) {
           if (Math.abs(touchesDiff) < 10) {
             calendar.resetMonth();
@@ -201,9 +217,9 @@ class Calendar extends Framework7Class {
           if ($dayEl.hasClass('calendar-day-next')) calendar.nextMonth();
           if ($dayEl.hasClass('calendar-day-prev')) calendar.prevMonth();
         }
-        const dateYear = $dayEl.attr('data-year');
-        const dateMonth = $dayEl.attr('data-month');
-        const dateDay = $dayEl.attr('data-day');
+        const dateYear = parseInt($dayEl.attr('data-year'), 10);
+        const dateMonth = parseInt($dayEl.attr('data-month'), 10);
+        const dateDay = parseInt($dayEl.attr('data-day'), 10);
         calendar.emit(
           'local::dayClick calendarDayClick',
           calendar,
@@ -213,26 +229,30 @@ class Calendar extends Framework7Class {
           dateDay
         );
         if (!$dayEl.hasClass('calendar-day-selected') || calendar.params.multiple || calendar.params.rangePicker) {
-          calendar.addValue(new Date(dateYear, dateMonth, dateDay, 0, 0, 0));
+          calendar.addValue(new calendar.DateHandleClass(dateYear, dateMonth, dateDay, 0, 0, 0));
         }
         if (calendar.params.closeOnSelect) {
           if (
-            (calendar.params.rangePicker && calendar.value.length === 2) ||
-            !calendar.params.rangePicker
+            (calendar.params.rangePicker && calendar.value.length === 2)
+            || !calendar.params.rangePicker
           ) {
             calendar.close();
           }
         }
       }
+
       function onNextMonthClick() {
         calendar.nextMonth();
       }
+
       function onPrevMonthClick() {
         calendar.prevMonth();
       }
+
       function onNextYearClick() {
         calendar.nextYear();
       }
+
       function onPrevYearClick() {
         calendar.prevYear();
       }
@@ -276,9 +296,11 @@ class Calendar extends Framework7Class {
   }
   // eslint-disable-next-line
   normalizeDate(date) {
-    const d = new Date(date);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const calendar = this;
+    const d = new calendar.DateHandleClass(date);
+    return new calendar.DateHandleClass(d.getFullYear(), d.getMonth(), d.getDate());
   }
+
   normalizeValues(values) {
     const calendar = this;
     let newValues = [];
@@ -287,11 +309,13 @@ class Calendar extends Framework7Class {
     }
     return newValues;
   }
+
   initInput() {
     const calendar = this;
     if (!calendar.$inputEl) return;
     if (calendar.params.inputReadOnly) calendar.$inputEl.prop('readOnly', true);
   }
+
   isPopover() {
     const calendar = this;
     const { app, modal, params } = calendar;
@@ -300,17 +324,19 @@ class Calendar extends Framework7Class {
 
     if (!calendar.inline && calendar.inputEl) {
       if (params.openIn === 'popover') return true;
-      else if (app.device.ios) {
+      if (app.device.ios) {
         return !!app.device.ipad;
-      } else if (app.width >= 768) {
+      }
+      if (app.width >= 768) {
         return true;
       }
     }
     return false;
   }
+
   formatDate(d) {
     const calendar = this;
-    const date = new Date(d);
+    const date = new calendar.DateHandleClass(d);
     const year = date.getFullYear();
     const month = date.getMonth();
     const month1 = month + 1;
@@ -330,6 +356,7 @@ class Calendar extends Framework7Class {
       .replace(/DD/g, dayNames[weekDay])
       .replace(/D(\W+)/g, `${dayNamesShort[weekDay]}$1`);
   }
+
   formatValue() {
     const calendar = this;
     const { value } = calendar;
@@ -340,14 +367,15 @@ class Calendar extends Framework7Class {
       .map(v => calendar.formatDate(v))
       .join(calendar.params.rangePicker ? ' - ' : ', ');
   }
+
   addValue(newValue) {
     const calendar = this;
-    const { multiple, rangePicker } = calendar.params;
+    const { multiple, rangePicker, rangePickerMinDays, rangePickerMaxDays } = calendar.params;
     if (multiple) {
       if (!calendar.value) calendar.value = [];
       let inValuesIndex;
       for (let i = 0; i < calendar.value.length; i += 1) {
-        if (new Date(newValue).getTime() === new Date(calendar.value[i]).getTime()) {
+        if (new calendar.DateHandleClass(newValue).getTime() === new calendar.DateHandleClass(calendar.value[i]).getTime()) {
           inValuesIndex = i;
         }
       }
@@ -362,8 +390,11 @@ class Calendar extends Framework7Class {
       if (calendar.value.length === 2 || calendar.value.length === 0) {
         calendar.value = [];
       }
-      if (calendar.value[0] !== newValue) calendar.value.push(newValue);
+
+      if ((calendar.value.length === 0
+        || ((Math.abs(calendar.value[0].getTime() - newValue.getTime()) >= (rangePickerMinDays - 1) * 60 * 60 * 24 * 1000) && (rangePickerMaxDays === 0 || Math.abs(calendar.value[0].getTime() - newValue.getTime()) <= (rangePickerMaxDays - 1) * 60 * 60 * 24 * 1000)))) calendar.value.push(newValue);
       else calendar.value = [];
+
       calendar.value.sort((a, b) => a - b);
       calendar.updateValue();
     } else {
@@ -371,15 +402,18 @@ class Calendar extends Framework7Class {
       calendar.updateValue();
     }
   }
+
   setValue(values) {
     const calendar = this;
     calendar.value = values;
     calendar.updateValue();
   }
+
   getValue() {
     const calendar = this;
     return calendar.value;
   }
+
   updateValue(onlyHeader) {
     const calendar = this;
     const {
@@ -394,13 +428,13 @@ class Calendar extends Framework7Class {
       $wrapperEl.find('.calendar-day-selected').removeClass('calendar-day-selected');
       let valueDate;
       if (params.rangePicker && value.length === 2) {
-        for (i = new Date(value[0]).getTime(); i <= new Date(value[1]).getTime(); i += 24 * 60 * 60 * 1000) {
-          valueDate = new Date(i);
+        for (i = new calendar.DateHandleClass(value[0]).getTime(); i <= new calendar.DateHandleClass(value[1]).getTime(); i += 24 * 60 * 60 * 1000) {
+          valueDate = new calendar.DateHandleClass(i);
           $wrapperEl.find(`.calendar-day[data-date="${valueDate.getFullYear()}-${valueDate.getMonth()}-${valueDate.getDate()}"]`).addClass('calendar-day-selected');
         }
       } else {
         for (i = 0; i < calendar.value.length; i += 1) {
-          valueDate = new Date(value[i]);
+          valueDate = new calendar.DateHandleClass(value[i]);
           $wrapperEl.find(`.calendar-day[data-date="${valueDate.getFullYear()}-${valueDate.getMonth()}-${valueDate.getDate()}"]`).addClass('calendar-day-selected');
         }
       }
@@ -421,6 +455,7 @@ class Calendar extends Framework7Class {
       }
     }
   }
+
   updateCurrentMonthYear(dir) {
     const calendar = this;
     const { $months, $el, params } = calendar;
@@ -434,10 +469,11 @@ class Calendar extends Framework7Class {
     $el.find('.current-month-value').text(params.monthNames[calendar.currentMonth]);
     $el.find('.current-year-value').text(calendar.currentYear);
   }
+
   update() {
     const calendar = this;
     const { currentYear, currentMonth, $wrapperEl } = calendar;
-    const currentDate = new Date(currentYear, currentMonth);
+    const currentDate = new calendar.DateHandleClass(currentYear, currentMonth);
     const prevMonthHtml = calendar.renderMonth(currentDate, 'prev');
     const currentMonthHtml = calendar.renderMonth(currentDate);
     const nextMonthHtml = calendar.renderMonth(currentDate, 'next');
@@ -456,6 +492,7 @@ class Calendar extends Framework7Class {
       );
     });
   }
+
   onMonthChangeStart(dir) {
     const calendar = this;
     const { $months, currentYear, currentMonth } = calendar;
@@ -473,6 +510,7 @@ class Calendar extends Framework7Class {
       currentMonth
     );
   }
+
   onMonthChangeEnd(dir, rebuildBoth) {
     const calendar = this;
     const { currentYear, currentMonth, $wrapperEl, monthsTranslate } = calendar;
@@ -489,11 +527,11 @@ class Calendar extends Framework7Class {
       rebuildBoth = true; // eslint-disable-line
     }
     if (!rebuildBoth) {
-      currentMonthHtml = calendar.renderMonth(new Date(currentYear, currentMonth), dir);
+      currentMonthHtml = calendar.renderMonth(new calendar.DateHandleClass(currentYear, currentMonth), dir);
     } else {
       $wrapperEl.find('.calendar-month-next, .calendar-month-prev').remove();
-      prevMonthHtml = calendar.renderMonth(new Date(currentYear, currentMonth), 'prev');
-      nextMonthHtml = calendar.renderMonth(new Date(currentYear, currentMonth), 'next');
+      prevMonthHtml = calendar.renderMonth(new calendar.DateHandleClass(currentYear, currentMonth), 'prev');
+      nextMonthHtml = calendar.renderMonth(new calendar.DateHandleClass(currentYear, currentMonth), 'next');
     }
     if (dir === 'next' || rebuildBoth) {
       $wrapperEl.append(currentMonthHtml || nextMonthHtml);
@@ -516,6 +554,7 @@ class Calendar extends Framework7Class {
       currentMonth
     );
   }
+
   setMonthsTranslate(translate) {
     const calendar = this;
     const { $months, isHorizontal: isH, inverter } = calendar;
@@ -538,6 +577,7 @@ class Calendar extends Framework7Class {
       .transform(`translate3d(${isH ? nextMonthTranslate : 0}%, ${isH ? 0 : nextMonthTranslate}%, 0)`)
       .addClass('calendar-month-next');
   }
+
   nextMonth(transition) {
     const calendar = this;
     const { params, $wrapperEl, inverter, isHorizontal: isH } = calendar;
@@ -547,11 +587,11 @@ class Calendar extends Framework7Class {
     }
     const nextMonth = parseInt(calendar.$months.eq(calendar.$months.length - 1).attr('data-month'), 10);
     const nextYear = parseInt(calendar.$months.eq(calendar.$months.length - 1).attr('data-year'), 10);
-    const nextDate = new Date(nextYear, nextMonth);
+    const nextDate = new calendar.DateHandleClass(nextYear, nextMonth);
     const nextDateTime = nextDate.getTime();
     const transitionEndCallback = !calendar.animating;
     if (params.maxDate) {
-      if (nextDateTime > new Date(params.maxDate).getTime()) {
+      if (nextDateTime > new calendar.DateHandleClass(params.maxDate).getTime()) {
         calendar.resetMonth();
         return;
       }
@@ -583,6 +623,7 @@ class Calendar extends Framework7Class {
       calendar.onMonthChangeEnd('next');
     }
   }
+
   prevMonth(transition) {
     const calendar = this;
     const { params, $wrapperEl, inverter, isHorizontal: isH } = calendar;
@@ -592,11 +633,13 @@ class Calendar extends Framework7Class {
     }
     const prevMonth = parseInt(calendar.$months.eq(0).attr('data-month'), 10);
     const prevYear = parseInt(calendar.$months.eq(0).attr('data-year'), 10);
-    const prevDate = new Date(prevYear, prevMonth + 1, -1);
+    const prevDate = new calendar.DateHandleClass(prevYear, prevMonth + 1, -1);
     const prevDateTime = prevDate.getTime();
     const transitionEndCallback = !calendar.animating;
     if (params.minDate) {
-      if (prevDateTime < new Date(params.minDate).getTime()) {
+      let minDate = new calendar.DateHandleClass(params.minDate);
+      minDate = new calendar.DateHandleClass(minDate.getFullYear(), minDate.getMonth(), 1);
+      if (prevDateTime < minDate.getTime()) {
         calendar.resetMonth();
         return;
       }
@@ -629,6 +672,7 @@ class Calendar extends Framework7Class {
       calendar.onMonthChangeEnd('prev');
     }
   }
+
   resetMonth(transition = '') {
     const calendar = this;
     const { $wrapperEl, inverter, isHorizontal: isH, monthsTranslate } = calendar;
@@ -653,19 +697,23 @@ class Calendar extends Framework7Class {
     }
     let targetDate;
     if (year < calendar.currentYear) {
-      targetDate = new Date(year, month + 1, -1).getTime();
+      targetDate = new calendar.DateHandleClass(year, month + 1, -1).getTime();
     } else {
-      targetDate = new Date(year, month).getTime();
+      targetDate = new calendar.DateHandleClass(year, month).getTime();
     }
-    if (params.maxDate && targetDate > new Date(params.maxDate).getTime()) {
+    if (params.maxDate && targetDate > new calendar.DateHandleClass(params.maxDate).getTime()) {
       return false;
     }
-    if (params.minDate && targetDate < new Date(params.minDate).getTime()) {
-      return false;
+    if (params.minDate) {
+      let minDate = new calendar.DateHandleClass(params.minDate);
+      minDate = new calendar.DateHandleClass(minDate.getFullYear(), minDate.getMonth(), 1);
+      if (targetDate < minDate.getTime()) {
+        return false;
+      }
     }
-    const currentDate = new Date(calendar.currentYear, calendar.currentMonth).getTime();
+    const currentDate = new calendar.DateHandleClass(calendar.currentYear, calendar.currentMonth).getTime();
     const dir = targetDate > currentDate ? 'next' : 'prev';
-    const newMonthHTML = calendar.renderMonth(new Date(year, month));
+    const newMonthHTML = calendar.renderMonth(new calendar.DateHandleClass(year, month));
     calendar.monthsTranslate = calendar.monthsTranslate || 0;
     const prevTranslate = calendar.monthsTranslate;
     let monthTranslate;
@@ -715,16 +763,19 @@ class Calendar extends Framework7Class {
       calendar.onMonthChangeEnd(dir);
     }
   }
+
   nextYear() {
     const calendar = this;
     calendar.setYearMonth(calendar.currentYear + 1);
   }
+
   prevYear() {
     const calendar = this;
     calendar.setYearMonth(calendar.currentYear - 1);
   }
   // eslint-disable-next-line
   dateInRange(dayDate, range) {
+    const calendar = this;
     let match = false;
     let i;
     if (!range) return false;
@@ -732,76 +783,85 @@ class Calendar extends Framework7Class {
       for (i = 0; i < range.length; i += 1) {
         if (range[i].from || range[i].to) {
           if (range[i].from && range[i].to) {
-            if ((dayDate <= new Date(range[i].to).getTime()) && (dayDate >= new Date(range[i].from).getTime())) {
+            if ((dayDate <= new calendar.DateHandleClass(range[i].to).getTime()) && (dayDate >= new calendar.DateHandleClass(range[i].from).getTime())) {
               match = true;
             }
           } else if (range[i].from) {
-            if (dayDate >= new Date(range[i].from).getTime()) {
+            if (dayDate >= new calendar.DateHandleClass(range[i].from).getTime()) {
               match = true;
             }
           } else if (range[i].to) {
-            if (dayDate <= new Date(range[i].to).getTime()) {
+            if (dayDate <= new calendar.DateHandleClass(range[i].to).getTime()) {
               match = true;
             }
           }
-        } else if (dayDate === new Date(range[i]).getTime()) {
+        } else if (range[i].date) {
+          if (dayDate === new calendar.DateHandleClass(range[i].date).getTime()) {
+            match = true;
+          }
+        } else if (dayDate === new calendar.DateHandleClass(range[i]).getTime()) {
           match = true;
         }
       }
     } else if (range.from || range.to) {
       if (range.from && range.to) {
-        if ((dayDate <= new Date(range.to).getTime()) && (dayDate >= new Date(range.from).getTime())) {
+        if ((dayDate <= new calendar.DateHandleClass(range.to).getTime()) && (dayDate >= new calendar.DateHandleClass(range.from).getTime())) {
           match = true;
         }
       } else if (range.from) {
-        if (dayDate >= new Date(range.from).getTime()) {
+        if (dayDate >= new calendar.DateHandleClass(range.from).getTime()) {
           match = true;
         }
       } else if (range.to) {
-        if (dayDate <= new Date(range.to).getTime()) {
+        if (dayDate <= new calendar.DateHandleClass(range.to).getTime()) {
           match = true;
         }
       }
+    } else if (range.date) {
+      match = dayDate === new calendar.DateHandleClass(range.date).getTime();
     } else if (typeof range === 'function') {
-      match = range(new Date(dayDate));
+      match = range(new calendar.DateHandleClass(dayDate));
     }
     return match;
   }
   // eslint-disable-next-line
   daysInMonth(date) {
-    const d = new Date(date);
-    return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    const calendar = this;
+    const d = new calendar.DateHandleClass(date);
+    return new calendar.DateHandleClass(d.getFullYear(), d.getMonth() + 1, 0).getDate();
   }
+
   renderMonths(date) {
     const calendar = this;
     if (calendar.params.renderMonths) {
       return calendar.params.renderMonths.call(calendar, date);
     }
     return `
-      <div class="calendar-months-wrapper">
-        ${calendar.renderMonth(date, 'prev')}
-        ${calendar.renderMonth(date)}
-        ${calendar.renderMonth(date, 'next')}
-      </div>
-    `.trim();
+    <div class="calendar-months-wrapper">
+    ${calendar.renderMonth(date, 'prev')}
+    ${calendar.renderMonth(date)}
+    ${calendar.renderMonth(date, 'next')}
+    </div>
+  `.trim();
   }
+
   renderMonth(d, offset) {
     const calendar = this;
     const { params, value } = calendar;
     if (params.renderMonth) {
       return params.renderMonth.call(calendar, d, offset);
     }
-    let date = new Date(d);
+    let date = new calendar.DateHandleClass(d);
     let year = date.getFullYear();
     let month = date.getMonth();
 
     if (offset === 'next') {
-      if (month === 11) date = new Date(year + 1, 0);
-      else date = new Date(year, month + 1, 1);
+      if (month === 11) date = new calendar.DateHandleClass(year + 1, 0);
+      else date = new calendar.DateHandleClass(year, month + 1, 1);
     }
     if (offset === 'prev') {
-      if (month === 0) date = new Date(year - 1, 11);
-      else date = new Date(year, month - 1, 1);
+      if (month === 0) date = new calendar.DateHandleClass(year - 1, 11);
+      else date = new calendar.DateHandleClass(year, month - 1, 1);
     }
     if (offset === 'next' || offset === 'prev') {
       month = date.getMonth();
@@ -809,25 +869,25 @@ class Calendar extends Framework7Class {
     }
 
     const currentValues = [];
-    const today = new Date().setHours(0, 0, 0, 0);
-    const minDate = params.minDate ? new Date(params.minDate).getTime() : null;
-    const maxDate = params.maxDate ? new Date(params.maxDate).getTime() : null;
+    const today = new calendar.DateHandleClass().setHours(0, 0, 0, 0);
+    const minDate = params.minDate ? new calendar.DateHandleClass(params.minDate).getTime() : null;
+    const maxDate = params.maxDate ? new calendar.DateHandleClass(params.maxDate).getTime() : null;
     const rows = 6;
     const cols = 7;
-    const daysInPrevMonth = calendar.daysInMonth(new Date(date.getFullYear(), date.getMonth()).getTime() - (10 * 24 * 60 * 60 * 1000));
+    const daysInPrevMonth = calendar.daysInMonth(new calendar.DateHandleClass(date.getFullYear(), date.getMonth()).getTime() - (10 * 24 * 60 * 60 * 1000));
     const daysInMonth = calendar.daysInMonth(date);
     const minDayNumber = params.firstDay === 6 ? 0 : 1;
 
     let monthHtml = '';
     let dayIndex = 0 + (params.firstDay - 1);
     let disabled;
-    let hasEvent;
-    let firstDayOfMonthIndex = new Date(date.getFullYear(), date.getMonth()).getDay();
+    let hasEvents;
+    let firstDayOfMonthIndex = new calendar.DateHandleClass(date.getFullYear(), date.getMonth()).getDay();
     if (firstDayOfMonthIndex === 0) firstDayOfMonthIndex = 7;
 
     if (value && value.length) {
       for (let i = 0; i < value.length; i += 1) {
-        currentValues.push(new Date(value[i]).setHours(0, 0, 0, 0));
+        currentValues.push(new calendar.DateHandleClass(value[i]).setHours(0, 0, 0, 0));
       }
     }
 
@@ -850,15 +910,15 @@ class Calendar extends Framework7Class {
         if (dayNumber < 0) {
           dayNumber = daysInPrevMonth + dayNumber + 1;
           addClass += ' calendar-day-prev';
-          dayDate = new Date(month - 1 < 0 ? year - 1 : year, month - 1 < 0 ? 11 : month - 1, dayNumber).getTime();
+          dayDate = new calendar.DateHandleClass(month - 1 < 0 ? year - 1 : year, month - 1 < 0 ? 11 : month - 1, dayNumber).getTime();
         } else {
           dayNumber += 1;
           if (dayNumber > daysInMonth) {
             dayNumber -= daysInMonth;
             addClass += ' calendar-day-next';
-            dayDate = new Date(month + 1 > 11 ? year + 1 : year, month + 1 > 11 ? 0 : month + 1, dayNumber).getTime();
+            dayDate = new calendar.DateHandleClass(month + 1 > 11 ? year + 1 : year, month + 1 > 11 ? 0 : month + 1, dayNumber).getTime();
           } else {
-            dayDate = new Date(year, month, dayNumber).getTime();
+            dayDate = new calendar.DateHandleClass(year, month, dayNumber).getTime();
           }
         }
         // Today
@@ -872,15 +932,37 @@ class Calendar extends Framework7Class {
         if (params.weekendDays.indexOf(weekDayIndex) >= 0) {
           addClass += ' calendar-day-weekend';
         }
-        // Has Events
-        hasEvent = false;
+        // Events
+        let eventsHtml = '';
+        hasEvents = false;
         if (params.events) {
           if (calendar.dateInRange(dayDate, params.events)) {
-            hasEvent = true;
+            hasEvents = true;
           }
         }
-        if (hasEvent) {
+        if (hasEvents) {
           addClass += ' calendar-day-has-events';
+          eventsHtml = `
+            <span class="calendar-day-events">
+              <span class="calendar-day-event"></span>
+            </span>
+          `;
+          if (Array.isArray(params.events)) {
+            const eventDots = [];
+            params.events.forEach((ev) => {
+              const color = ev.color || '';
+              if (eventDots.indexOf(color) < 0 && calendar.dateInRange(dayDate, ev)) {
+                eventDots.push(color);
+              }
+            });
+            eventsHtml = `
+              <span class="calendar-day-events">
+                ${eventDots.map(color => `
+                  <span class="calendar-day-event" style="${color ? `background-color: ${color}` : ''}"></span>
+                `.trim()).join('')}
+              </span>
+            `;
+          }
         }
         // Custom Ranges
         if (params.rangesClasses) {
@@ -904,12 +986,12 @@ class Calendar extends Framework7Class {
           addClass += ' calendar-day-disabled';
         }
 
-        dayDate = new Date(dayDate);
+        dayDate = new calendar.DateHandleClass(dayDate);
         const dayYear = dayDate.getFullYear();
         const dayMonth = dayDate.getMonth();
         rowHtml += `
           <div data-year="${dayYear}" data-month="${dayMonth}" data-day="${dayNumber}" class="calendar-day${addClass}" data-date="${dayYear}-${dayMonth}-${dayNumber}">
-            <span>${dayNumber}</span>
+            <span class="calendar-day-number">${dayNumber}${eventsHtml}</span>
           </div>`.trim();
       }
       monthHtml += `<div class="calendar-row">${rowHtml}</div>`;
@@ -917,6 +999,7 @@ class Calendar extends Framework7Class {
     monthHtml = `<div class="calendar-month" data-year="${year}" data-month="${month}">${monthHtml}</div>`;
     return monthHtml;
   }
+
   renderWeekHeader() {
     const calendar = this;
     if (calendar.params.renderWeekHeader) {
@@ -932,11 +1015,12 @@ class Calendar extends Framework7Class {
       weekDaysHtml += `<div class="calendar-week-day">${dayName}</div>`;
     }
     return `
-      <div class="calendar-week-header">
-        ${weekDaysHtml}
-      </div>
-    `.trim();
+    <div class="calendar-week-header">
+    ${weekDaysHtml}
+    </div>
+  `.trim();
   }
+
   renderMonthSelector() {
     const calendar = this;
     const app = calendar.app;
@@ -953,17 +1037,18 @@ class Calendar extends Framework7Class {
 
     const iconColor = app.theme === 'md' && needsBlackIcon ? 'color-black' : '';
     return `
-      <div class="calendar-month-selector">
-        <a href="#" class="link icon-only calendar-prev-month-button">
-          <i class="icon icon-prev ${iconColor}"></i>
-        </a>
-        <span class="current-month-value"></span>
-        <a href="#" class="link icon-only calendar-next-month-button">
-          <i class="icon icon-next ${iconColor}"></i>
-        </a>
-      </div>
-    `.trim();
+    <div class="calendar-month-selector">
+    <a href="#" class="link icon-only calendar-prev-month-button">
+      <i class="icon icon-prev ${iconColor}"></i>
+    </a>
+    <span class="current-month-value"></span>
+    <a href="#" class="link icon-only calendar-next-month-button">
+      <i class="icon icon-next ${iconColor}"></i>
+    </a>
+    </div>
+  `.trim();
   }
+
   renderYearSelector() {
     const calendar = this;
     const app = calendar.app;
@@ -980,28 +1065,30 @@ class Calendar extends Framework7Class {
 
     const iconColor = app.theme === 'md' && needsBlackIcon ? 'color-black' : '';
     return `
-      <div class="calendar-year-selector">
-        <a href="#" class="link icon-only calendar-prev-year-button">
-          <i class="icon icon-prev ${iconColor}"></i>
-        </a>
-        <span class="current-year-value"></span>
-        <a href="#" class="link icon-only calendar-next-year-button">
-          <i class="icon icon-next ${iconColor}"></i>
-        </a>
-      </div>
-    `.trim();
+    <div class="calendar-year-selector">
+    <a href="#" class="link icon-only calendar-prev-year-button">
+      <i class="icon icon-prev ${iconColor}"></i>
+    </a>
+    <span class="current-year-value"></span>
+    <a href="#" class="link icon-only calendar-next-year-button">
+      <i class="icon icon-next ${iconColor}"></i>
+    </a>
+    </div>
+  `.trim();
   }
+
   renderHeader() {
     const calendar = this;
     if (calendar.params.renderHeader) {
       return calendar.params.renderHeader.call(calendar);
     }
     return `
-      <div class="calendar-header">
-        <div class="calendar-selected-date">${calendar.params.headerPlaceholder}</div>
-      </div>
-    `.trim();
+    <div class="calendar-header">
+    <div class="calendar-selected-date">${calendar.params.headerPlaceholder}</div>
+    </div>
+  `.trim();
   }
+
   renderFooter() {
     const calendar = this;
     const app = calendar.app;
@@ -1009,106 +1096,111 @@ class Calendar extends Framework7Class {
       return calendar.params.renderFooter.call(calendar);
     }
     return `
-      <div class="calendar-footer">
-        <a href="#" class="${app.theme === 'md' ? 'button' : 'link'} calendar-close sheet-close popover-close">${calendar.params.toolbarCloseText}</a>
-      </div>
-    `.trim();
+    <div class="calendar-footer">
+    <a href="#" class="${app.theme === 'md' ? 'button' : 'link'} calendar-close sheet-close popover-close">${calendar.params.toolbarCloseText}</a>
+    </div>
+  `.trim();
   }
+
   renderToolbar() {
     const calendar = this;
     if (calendar.params.renderToolbar) {
       return calendar.params.renderToolbar.call(calendar, calendar);
     }
     return `
-      <div class="toolbar no-shadow">
-        <div class="toolbar-inner">
-          ${calendar.renderMonthSelector()}
-          ${calendar.renderYearSelector()}
-        </div>
-      </div>
-    `.trim();
+    <div class="toolbar no-shadow">
+    <div class="toolbar-inner">
+      ${calendar.renderMonthSelector()}
+      ${calendar.renderYearSelector()}
+    </div>
+    </div>
+  `.trim();
   }
   // eslint-disable-next-line
   renderInline() {
     const calendar = this;
     const { cssClass, toolbar, header, footer, rangePicker, weekHeader } = calendar.params;
     const { value } = calendar;
-    const date = value && value.length ? value[0] : new Date().setHours(0, 0, 0);
+    const date = value && value.length ? value[0] : new calendar.DateHandleClass().setHours(0, 0, 0);
     const inlineHtml = `
-      <div class="calendar calendar-inline ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
-        ${header ? calendar.renderHeader() : ''}
-        ${toolbar ? calendar.renderToolbar() : ''}
-        ${weekHeader ? calendar.renderWeekHeader() : ''}
-        <div class="calendar-months">
-          ${calendar.renderMonths(date)}
-        </div>
-        ${footer ? calendar.renderFooter() : ''}
-      </div>
-    `.trim();
+    <div class="calendar calendar-inline ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
+    ${header ? calendar.renderHeader() : ''}
+    ${toolbar ? calendar.renderToolbar() : ''}
+    ${weekHeader ? calendar.renderWeekHeader() : ''}
+    <div class="calendar-months">
+      ${calendar.renderMonths(date)}
+    </div>
+    ${footer ? calendar.renderFooter() : ''}
+    </div>
+  `.trim();
 
     return inlineHtml;
   }
+
   renderCustomModal() {
     const calendar = this;
     const { cssClass, toolbar, header, footer, rangePicker, weekHeader } = calendar.params;
     const { value } = calendar;
-    const date = value && value.length ? value[0] : new Date().setHours(0, 0, 0);
+    const date = value && value.length ? value[0] : new calendar.DateHandleClass().setHours(0, 0, 0);
     const sheetHtml = `
-      <div class="calendar calendar-modal ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
-        ${header ? calendar.renderHeader() : ''}
-        ${toolbar ? calendar.renderToolbar() : ''}
-        ${weekHeader ? calendar.renderWeekHeader() : ''}
-        <div class="calendar-months">
-          ${calendar.renderMonths(date)}
-        </div>
-        ${footer ? calendar.renderFooter() : ''}
-      </div>
-    `.trim();
+    <div class="calendar calendar-modal ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
+    ${header ? calendar.renderHeader() : ''}
+    ${toolbar ? calendar.renderToolbar() : ''}
+    ${weekHeader ? calendar.renderWeekHeader() : ''}
+    <div class="calendar-months">
+      ${calendar.renderMonths(date)}
+    </div>
+    ${footer ? calendar.renderFooter() : ''}
+    </div>
+  `.trim();
 
     return sheetHtml;
   }
+
   renderSheet() {
     const calendar = this;
     const { cssClass, toolbar, header, footer, rangePicker, weekHeader } = calendar.params;
     const { value } = calendar;
-    const date = value && value.length ? value[0] : new Date().setHours(0, 0, 0);
+    const date = value && value.length ? value[0] : new calendar.DateHandleClass().setHours(0, 0, 0);
     const sheetHtml = `
-      <div class="sheet-modal calendar calendar-sheet ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
-        ${header ? calendar.renderHeader() : ''}
-        ${toolbar ? calendar.renderToolbar() : ''}
-        ${weekHeader ? calendar.renderWeekHeader() : ''}
-        <div class="sheet-modal-inner calendar-months">
-          ${calendar.renderMonths(date)}
-        </div>
-        ${footer ? calendar.renderFooter() : ''}
-      </div>
-    `.trim();
+    <div class="sheet-modal calendar calendar-sheet ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
+    ${header ? calendar.renderHeader() : ''}
+    ${toolbar ? calendar.renderToolbar() : ''}
+    ${weekHeader ? calendar.renderWeekHeader() : ''}
+    <div class="sheet-modal-inner calendar-months">
+      ${calendar.renderMonths(date)}
+    </div>
+    ${footer ? calendar.renderFooter() : ''}
+    </div>
+  `.trim();
 
     return sheetHtml;
   }
+
   renderPopover() {
     const calendar = this;
     const { cssClass, toolbar, header, footer, rangePicker, weekHeader } = calendar.params;
     const { value } = calendar;
-    const date = value && value.length ? value[0] : new Date().setHours(0, 0, 0);
+    const date = value && value.length ? value[0] : new calendar.DateHandleClass().setHours(0, 0, 0);
     const popoverHtml = `
-      <div class="popover calendar-popover">
-        <div class="popover-inner">
-          <div class="calendar ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
-            ${header ? calendar.renderHeader() : ''}
-            ${toolbar ? calendar.renderToolbar() : ''}
-            ${weekHeader ? calendar.renderWeekHeader() : ''}
-            <div class="calendar-months">
-              ${calendar.renderMonths(date)}
-            </div>
-            ${footer ? calendar.renderFooter() : ''}
-          </div>
-        </div>
+    <div class="popover calendar-popover">
+    <div class="popover-inner">
+      <div class="calendar ${rangePicker ? 'calendar-range' : ''} ${cssClass || ''}">
+      ${header ? calendar.renderHeader() : ''}
+      ${toolbar ? calendar.renderToolbar() : ''}
+      ${weekHeader ? calendar.renderWeekHeader() : ''}
+      <div class="calendar-months">
+        ${calendar.renderMonths(date)}
       </div>
-    `.trim();
+      ${footer ? calendar.renderFooter() : ''}
+      </div>
+    </div>
+    </div>
+  `.trim();
 
     return popoverHtml;
   }
+
   render() {
     const calendar = this;
     const { params } = calendar;
@@ -1118,15 +1210,18 @@ class Calendar extends Framework7Class {
       if (modalType === 'auto') modalType = calendar.isPopover() ? 'popover' : 'sheet';
 
       if (modalType === 'popover') return calendar.renderPopover();
-      else if (modalType === 'sheet') return calendar.renderSheet();
+      if (modalType === 'sheet') return calendar.renderSheet();
       return calendar.renderCustomModal();
     }
     return calendar.renderInline();
   }
+
   onOpen() {
     const calendar = this;
     const { initialized, $el, app, $inputEl, inline, value, params } = calendar;
+    calendar.closing = false;
     calendar.opened = true;
+    calendar.opening = true;
 
     // Init main events
     calendar.attachCalendarEvents();
@@ -1176,8 +1271,10 @@ class Calendar extends Framework7Class {
     }
     calendar.emit('local::open calendarOpen', calendar);
   }
+
   onOpened() {
     const calendar = this;
+    calendar.opening = false;
     if (calendar.$el) {
       calendar.$el.trigger('calendar:opened', calendar);
     }
@@ -1186,9 +1283,12 @@ class Calendar extends Framework7Class {
     }
     calendar.emit('local::opened calendarOpened', calendar);
   }
+
   onClose() {
     const calendar = this;
     const app = calendar.app;
+    calendar.opening = false;
+    calendar.closing = true;
 
     if (calendar.$inputEl && app.theme === 'md') {
       calendar.$inputEl.trigger('blur');
@@ -1205,9 +1305,11 @@ class Calendar extends Framework7Class {
     }
     calendar.emit('local::close calendarClose', calendar);
   }
+
   onClosed() {
     const calendar = this;
     calendar.opened = false;
+    calendar.closing = false;
 
     if (!calendar.inline) {
       Utils.nextTick(() => {
@@ -1227,6 +1329,7 @@ class Calendar extends Framework7Class {
     }
     calendar.emit('local::closed calendarClosed', calendar);
   }
+
   open() {
     const calendar = this;
     const { app, opened, inline, $inputEl, params } = calendar;
@@ -1252,7 +1355,8 @@ class Calendar extends Framework7Class {
       targetEl: $inputEl,
       scrollToEl: calendar.params.scrollToInput ? $inputEl : undefined,
       content: modalContent,
-      backdrop: modalType === 'popover' && app.params.popover.backdrop !== false,
+      backdrop: calendar.params.backdrop === true || (modalType === 'popover' && app.params.popover.backdrop !== false && calendar.params.backdrop !== false),
+      closeByBackdropClick: calendar.params.closeByBackdropClick,
       on: {
         open() {
           const modal = this;
@@ -1286,6 +1390,7 @@ class Calendar extends Framework7Class {
       calendar.modal.open();
     }
   }
+
   close() {
     const calendar = this;
     const { opened, inline } = calendar;
@@ -1301,6 +1406,7 @@ class Calendar extends Framework7Class {
       calendar.modal.close();
     }
   }
+
   init() {
     const calendar = this;
 
@@ -1325,6 +1431,7 @@ class Calendar extends Framework7Class {
     }
     calendar.emit('local::init calendarInit', calendar);
   }
+
   destroy() {
     const calendar = this;
     if (calendar.destroyed) return;

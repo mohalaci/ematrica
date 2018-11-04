@@ -10,11 +10,20 @@ const Toolbar = {
 
     if ($tabbarEl.length === 0 || !($tabbarEl.hasClass('tabbar') || $tabbarEl.hasClass('tabbar-labels'))) return;
 
-    if ($tabbarEl.find('.tab-link-highlight').length === 0) {
-      $tabbarEl.children('.toolbar-inner').append('<span class="tab-link-highlight"></span>');
+    let $highlightEl = $tabbarEl.find('.tab-link-highlight');
+    const tabLinksCount = $tabbarEl.find('.tab-link').length;
+    if (tabLinksCount === 0) {
+      $highlightEl.remove();
+      return;
     }
 
-    const $highlightEl = $tabbarEl.find('.tab-link-highlight');
+    if ($highlightEl.length === 0) {
+      $tabbarEl.children('.toolbar-inner').append('<span class="tab-link-highlight"></span>');
+      $highlightEl = $tabbarEl.find('.tab-link-highlight');
+    } else if ($highlightEl.next().length) {
+      $tabbarEl.children('.toolbar-inner').append($highlightEl);
+    }
+
     const $activeLink = $tabbarEl.find('.tab-link-active');
     let highlightWidth;
     let highlightTranslate;
@@ -24,14 +33,15 @@ const Toolbar = {
       highlightTranslate = `${$activeLink[0].offsetLeft}px`;
     } else {
       const activeIndex = $activeLink.index();
-      const tabLinksCount = $tabbarEl.find('.tab-link').length;
       highlightWidth = `${100 / tabLinksCount}%`;
       highlightTranslate = `${(app.rtl ? -activeIndex : activeIndex) * 100}%`;
     }
 
-    $highlightEl
-      .css('width', highlightWidth)
-      .transform(`translate3d(${highlightTranslate},0,0)`);
+    Utils.nextFrame(() => {
+      $highlightEl
+        .css('width', highlightWidth)
+        .transform(`translate3d(${highlightTranslate},0,0)`);
+    });
   },
   init(tabbarEl) {
     const app = this;
@@ -149,10 +159,10 @@ export default {
       const app = this;
       let $toolbarEl = page.$el.parents('.view').children('.toolbar');
       if ($toolbarEl.length === 0) {
-        $toolbarEl = page.$el.find('.toolbar');
+        $toolbarEl = page.$el.parents('.views').children('.tabbar, .tabbar-labels');
       }
       if ($toolbarEl.length === 0) {
-        $toolbarEl = page.$el.parents('.views').children('.tabbar, .tabbar-labels');
+        $toolbarEl = page.$el.find('.toolbar');
       }
       if ($toolbarEl.length === 0) {
         return;
@@ -169,17 +179,17 @@ export default {
         app.toolbar.init(tabbarEl);
       });
       if (
-        app.params.toolbar.hideOnPageScroll ||
-        page.$el.find('.hide-toolbar-on-scroll').length ||
-        page.$el.hasClass('hide-toolbar-on-scroll') ||
-        page.$el.find('.hide-bars-on-scroll').length ||
-        page.$el.hasClass('hide-bars-on-scroll')
+        app.params.toolbar.hideOnPageScroll
+        || page.$el.find('.hide-toolbar-on-scroll').length
+        || page.$el.hasClass('hide-toolbar-on-scroll')
+        || page.$el.find('.hide-bars-on-scroll').length
+        || page.$el.hasClass('hide-bars-on-scroll')
       ) {
         if (
-          page.$el.find('.keep-toolbar-on-scroll').length ||
-          page.$el.hasClass('keep-toolbar-on-scroll') ||
-          page.$el.find('.keep-bars-on-scroll').length ||
-          page.$el.hasClass('keep-bars-on-scroll')
+          page.$el.find('.keep-toolbar-on-scroll').length
+          || page.$el.hasClass('keep-toolbar-on-scroll')
+          || page.$el.find('.keep-bars-on-scroll').length
+          || page.$el.hasClass('keep-bars-on-scroll')
         ) {
           return;
         }

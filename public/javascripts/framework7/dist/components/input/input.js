@@ -29,7 +29,7 @@ const Input = {
     }
 
     const styles = window.getComputedStyle($textareaEl[0]);
-    ('padding margin width font-size font-family font-style font-weight line-height font-variant text-transform letter-spacing border box-sizing display').split(' ').forEach((style) => {
+    ('padding-top padding-bottom padding-left padding-right margin-left margin-right margin-top margin-bottom width font-size font-family font-style font-weight line-height font-variant text-transform letter-spacing border box-sizing display').split(' ').forEach((style) => {
       let styleValue = styles[style];
       if (('font-size line-height letter-spacing width').split(' ').indexOf(style) >= 0) {
         styleValue = styleValue.replace(',', '.');
@@ -106,7 +106,12 @@ const Input = {
     $inputEl.removeClass('input-focused');
   },
   checkEmptyState(inputEl) {
-    const $inputEl = $(inputEl);
+    let $inputEl = $(inputEl);
+    if (!$inputEl.is('input, select, textarea')) {
+      $inputEl = $inputEl.find('input, select, textarea').eq(0);
+    }
+    if (!$inputEl.length) return;
+
     const value = $inputEl.val();
     const $itemInputEl = $inputEl.parents('.item-input');
     const $inputWrapEl = $inputEl.parents('.input');
@@ -144,10 +149,12 @@ const Input = {
     if (contentScrollTop > min) {
       $scrollableEl.scrollTop(centered ? centeredPosition : min, duration);
       return true;
-    } else if (contentScrollTop < max) {
+    }
+    if (contentScrollTop < max) {
       $scrollableEl.scrollTop(centered ? centeredPosition : max, duration);
       return true;
-    } else if (force) {
+    }
+    if (force) {
       $scrollableEl.scrollTop(centered ? centeredPosition : max, duration);
     }
     return false;
@@ -214,7 +221,7 @@ const Input = {
       const previousValue = $inputEl.val();
       $inputEl
         .val('')
-        .trigger('change input')
+        .trigger('input change')
         .focus()
         .trigger('input:clear', previousValue);
     }

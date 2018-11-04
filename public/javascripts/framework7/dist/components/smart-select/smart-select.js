@@ -13,6 +13,7 @@ export default {
       pageTitle: undefined,
       pageBackLinkText: 'Back',
       popupCloseLinkText: 'Close',
+      popupTabletFullscreen: false,
       sheetCloseLinkText: 'Done',
       searchbar: false,
       searchbarPlaceholder: 'Search',
@@ -24,6 +25,7 @@ export default {
       navbarColorTheme: undefined,
       routableModals: true,
       url: 'select/',
+      cssClass: '',
       /*
         Custom render functions
       */
@@ -98,6 +100,21 @@ export default {
         const ss = app.smartSelect.create(Utils.extend({ el: $clickedEl }, data));
         ss.open();
       }
+    },
+  },
+  vnode: {
+    'smart-select-init': {
+      insert(vnode) {
+        const app = this;
+        const smartSelectEl = vnode.elm;
+        app.smartSelect.create(Utils.extend({ el: smartSelectEl }, $(smartSelectEl).dataset()));
+      },
+      destroy(vnode) {
+        const smartSelectEl = vnode.elm;
+        if (smartSelectEl.f7SmartSelect && smartSelectEl.f7SmartSelect.destroy) {
+          smartSelectEl.f7SmartSelect.destroy();
+        }
+      },
     },
   },
 };

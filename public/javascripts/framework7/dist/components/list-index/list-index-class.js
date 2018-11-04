@@ -43,6 +43,10 @@ class ListIndex extends Framework7Class {
       return index;
     }
 
+    if ($el[0].f7ListIndex) {
+      return $el[0].f7ListIndex;
+    }
+
     $ul = $el.find('ul');
     if ($ul.length === 0) {
       $ul = $('<ul></ul>');
@@ -241,14 +245,17 @@ class ListIndex extends Framework7Class {
     }
     return index;
   }
+
   renderSkipPlaceholder() {
     const index = this;
     return index.params.renderSkipPlaceholder.call(index);
   }
+
   renderItem(itemContent, itemIndex) {
     const index = this;
     return index.params.renderItem.call(index, itemContent, itemIndex);
   }
+
   render() {
     const index = this;
     const { $ul, indexes, skipRate } = index;
@@ -271,6 +278,7 @@ class ListIndex extends Framework7Class {
 
     return index;
   }
+
   calcSize() {
     const index = this;
     const { app, params, el, indexes } = index;
@@ -288,6 +296,7 @@ class ListIndex extends Framework7Class {
 
     return index;
   }
+
   calcIndexes() {
     const index = this;
     if (index.params.indexes === 'auto') {
@@ -304,6 +313,7 @@ class ListIndex extends Framework7Class {
     }
     return index;
   }
+
   update() {
     const index = this;
     index.calcIndexes();
@@ -312,6 +322,7 @@ class ListIndex extends Framework7Class {
 
     return index;
   }
+
   init() {
     const index = this;
     index.calcIndexes();
@@ -319,13 +330,16 @@ class ListIndex extends Framework7Class {
     index.render();
     index.attachEvents();
   }
+
   destroy() {
     let index = this;
     index.$el.trigger('listindex:beforedestroy', index);
     index.emit('local::beforeDestroy listIndexBeforeDestroy', index);
     index.detachEvents();
-    index.$el[0].f7ListIndex = null;
-    delete index.$el[0].f7ListIndex;
+    if (index.$el[0]) {
+      index.$el[0].f7ListIndex = null;
+      delete index.$el[0].f7ListIndex;
+    }
     Utils.deleteProps(index);
     index = null;
   }

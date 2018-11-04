@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var ejs = require('ejs');
 var db = require('./utils/database');
+var helmet = require('helmet');
 
 var indexRouter = require('./routes/index');
 var callbackRouter = require('./routes/callback');
@@ -22,6 +23,7 @@ db.initProductsIfNotExist();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static('views'));
+app.use(helmet());
 
 app.use(logger('dev'));
 app.use(express.json());

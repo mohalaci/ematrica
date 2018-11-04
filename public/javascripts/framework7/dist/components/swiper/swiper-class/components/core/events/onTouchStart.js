@@ -1,19 +1,19 @@
 import { window, document } from 'ssr-window';
 import $ from '../../../utils/dom';
-import Device from '../../../utils/device';
 import Utils from '../../../utils/utils';
 
 export default function (event) {
   const swiper = this;
   const data = swiper.touchEventsData;
   const { params, touches } = swiper;
-  if (swiper.animating && params.preventIntercationOnTransition) {
+  if (swiper.animating && params.preventInteractionOnTransition) {
     return;
   }
   let e = event;
   if (e.originalEvent) e = e.originalEvent;
   data.isTouchEvent = e.type === 'touchstart';
   if (!data.isTouchEvent && 'which' in e && e.which === 3) return;
+  if (!data.isTouchEvent && 'button' in e && e.button > 0) return;
   if (data.isTouched && data.isMoved) return;
   if (params.noSwiping && $(e.target).closest(params.noSwipingSelector ? params.noSwipingSelector : `.${params.noSwipingClass}`)[0]) {
     swiper.allowClick = true;
@@ -30,12 +30,12 @@ export default function (event) {
 
   // Do NOT start if iOS edge swipe is detected. Otherwise iOS app (UIWebView) cannot swipe-to-go-back anymore
 
+  const edgeSwipeDetection = params.edgeSwipeDetection || params.iOSEdgeSwipeDetection;
+  const edgeSwipeThreshold = params.edgeSwipeThreshold || params.iOSEdgeSwipeThreshold;
   if (
-    Device.ios &&
-    !Device.cordova &&
-    params.iOSEdgeSwipeDetection &&
-    ((startX <= params.iOSEdgeSwipeThreshold) ||
-    (startX >= window.screen.width - params.iOSEdgeSwipeThreshold))
+    edgeSwipeDetection
+    && ((startX <= edgeSwipeThreshold)
+    || (startX >= window.screen.width - edgeSwipeThreshold))
   ) {
     return;
   }
@@ -59,13 +59,13 @@ export default function (event) {
     let preventDefault = true;
     if ($(e.target).is(data.formElements)) preventDefault = false;
     if (
-      document.activeElement &&
-      $(document.activeElement).is(data.formElements) &&
-      document.activeElement !== e.target
+      document.activeElement
+      && $(document.activeElement).is(data.formElements)
+      && document.activeElement !== e.target
     ) {
       document.activeElement.blur();
     }
-    if (preventDefault && swiper.allowTouchMove) {
+    if (preventDefault && swiper.allowTouchMove && params.touchStartPreventDefault) {
       e.preventDefault();
     }
   }

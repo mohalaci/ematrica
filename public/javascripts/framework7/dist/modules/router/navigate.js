@@ -3,6 +3,7 @@ import { document } from 'ssr-window';
 import Utils from '../../utils/utils';
 import History from '../../utils/history';
 import redirect from './redirect';
+import processRouteQueue from './process-route-queue';
 
 function refreshPage() {
   const router = this;
@@ -17,7 +18,7 @@ function forward(el, forwardOptions = {}) {
   const app = router.app;
   const view = router.view;
 
-  const options = Utils.extend({
+  const options = Utils.extend(false, {
     animate: router.params.animate,
     pushState: true,
     replaceState: false,
@@ -28,6 +29,38 @@ function forward(el, forwardOptions = {}) {
     clearPreviousHistory: false,
     on: {},
   }, forwardOptions);
+
+  let currentRouteIsModal = router.currentRoute.modal;
+  let modalType;
+  if (!currentRouteIsModal) {
+    ('popup popover sheet loginScreen actions customModal panel').split(' ').forEach((modalLoadProp) => {
+      if (router.currentRoute && router.currentRoute.route && router.currentRoute.route[modalLoadProp]) {
+        currentRouteIsModal = true;
+        modalType = modalLoadProp;
+      }
+    });
+  }
+
+  if (currentRouteIsModal) {
+    const modalToClose = router.currentRoute.modal
+                         || router.currentRoute.route.modalInstance
+                         || app[modalType].get();
+    const previousUrl = router.history[router.history.length - 2];
+    let previousRoute = router.findMatchingRoute(previousUrl);
+    if (!previousRoute && previousUrl) {
+      previousRoute = {
+        url: previousUrl,
+        path: previousUrl.split('?')[0],
+        query: Utils.parseUrlQuery(previousUrl),
+        route: {
+          path: previousUrl.split('?')[0],
+          url: previousUrl,
+        },
+      };
+    }
+
+    router.modalRemove(modalToClose);
+  }
 
   const dynamicNavbar = router.dynamicNavbar;
   const separateNavbar = router.separateNavbar;
@@ -393,14 +426,15 @@ function load(loadParams = {}, loadOptions = {}, ignorePageChange) {
   const options = loadOptions;
   const { url, content, el, pageName, template, templateUrl, component, componentUrl } = params;
 
-  if (!options.reloadCurrent &&
-    options.route &&
-    options.route.route &&
-    options.route.route.parentPath &&
-    router.currentRoute.route &&
-    router.currentRoute.route.parentPath === options.route.route.parentPath) {
+  if (!options.reloadCurrent
+    && options.route
+    && options.route.route
+    && options.route.route.parentPath
+    && router.currentRoute.route
+    && router.currentRoute.route.parentPath === options.route.route.parentPath) {
     // Do something nested
     if (options.route.url === router.url) {
+      router.allowPageChange = true;
       return false;
     }
     // Check for same params
@@ -409,8 +443,8 @@ function load(loadParams = {}, loadOptions = {}, ignorePageChange) {
       // Check for equal params name
       Object.keys(options.route.params).forEach((paramName) => {
         if (
-          !(paramName in router.currentRoute.params) ||
-          (router.currentRoute.params[paramName] !== options.route.params[paramName])
+          !(paramName in router.currentRoute.params)
+          || (router.currentRoute.params[paramName] !== options.route.params[paramName])
         ) {
           sameParams = false;
         }
@@ -425,11 +459,11 @@ function load(loadParams = {}, loadOptions = {}, ignorePageChange) {
   }
 
   if (
-    options.route &&
-    options.route.url &&
-    router.url === options.route.url &&
-    !(options.reloadCurrent || options.reloadPrevious) &&
-    !router.params.allowDuplicateUrls
+    options.route
+    && options.route.url
+    && router.url === options.route.url
+    && !(options.reloadCurrent || options.reloadPrevious)
+    && !router.params.allowDuplicateUrls
   ) {
     router.allowPageChange = true;
     return false;
@@ -496,13 +530,33 @@ function load(loadParams = {}, loadOptions = {}, ignorePageChange) {
 }
 function navigate(navigateParams, navigateOptions = {}) {
   const router = this;
+  if (router.swipeBackActive) return router;
   let url;
   let createRoute;
+  let name;
+  let query;
+  let params;
+  let route;
   if (typeof navigateParams === 'string') {
     url = navigateParams;
   } else {
     url = navigateParams.url;
     createRoute = navigateParams.route;
+    name = navigateParams.name;
+    query = navigateParams.query;
+    params = navigateParams.params;
+  }
+  if (name) {
+    // find route by name
+    route = router.findRouteByKey('name', name);
+    if (!route) {
+      throw new Error(`Framework7: route with name "${name}" not found`);
+    }
+    url = router.constructRouteUrl(route, { params, query });
+    if (url) {
+      return router.navigate(url, navigateOptions);
+    }
+    throw new Error(`Framework7: can't construct URL for route with name "${name}"`);
   }
   const app = router.app;
   if (!router.view) {
@@ -522,7 +576,6 @@ function navigate(navigateParams, navigateOptions = {}) {
       .replace('///', '/')
       .replace('//', '/');
   }
-  let route;
   if (createRoute) {
     route = Utils.extend(router.parseRouteUrl(navigateUrl), {
       route: Utils.extend({}, createRoute),
@@ -539,54 +592,90 @@ function navigate(navigateParams, navigateOptions = {}) {
     return redirect.call(router, 'navigate', route, navigateOptions);
   }
 
+
   const options = {};
   if (route.route.options) {
     Utils.extend(options, route.route.options, navigateOptions, { route });
   } else {
     Utils.extend(options, navigateOptions, { route });
   }
+
   if (options && options.context) {
     route.context = options.context;
     options.route.context = options.context;
   }
-  ('popup popover sheet loginScreen actions customModal').split(' ').forEach((modalLoadProp) => {
-    if (route.route[modalLoadProp]) {
-      router.modalLoad(modalLoadProp, route, options);
-    }
-  });
-  ('url content component pageName el componentUrl template templateUrl').split(' ').forEach((pageLoadProp) => {
-    if (route.route[pageLoadProp]) {
-      router.load({ [pageLoadProp]: route.route[pageLoadProp] }, options);
-    }
-  });
-  // Async
-  function asyncResolve(resolveParams, resolveOptions) {
-    router.allowPageChange = false;
-    let resolvedAsModal = false;
-    if (resolveOptions && resolveOptions.context) {
-      if (!route.context) route.context = resolveOptions.context;
-      else route.context = Utils.extend({}, route.context, resolveOptions.context);
-      options.route.context = route.context;
-    }
-    ('popup popover sheet loginScreen actions customModal').split(' ').forEach((modalLoadProp) => {
-      if (resolveParams[modalLoadProp]) {
-        resolvedAsModal = true;
-        const modalRoute = Utils.extend({}, route, { route: resolveParams });
-        router.allowPageChange = true;
-        router.modalLoad(modalLoadProp, modalRoute, Utils.extend(options, resolveOptions));
+
+  function resolve() {
+    let routerLoaded = false;
+    ('popup popover sheet loginScreen actions customModal panel').split(' ').forEach((modalLoadProp) => {
+      if (route.route[modalLoadProp] && !routerLoaded) {
+        routerLoaded = true;
+        router.modalLoad(modalLoadProp, route, options);
       }
     });
-    if (resolvedAsModal) return;
-    router.load(resolveParams, Utils.extend(options, resolveOptions), true);
+    ('url content component pageName el componentUrl template templateUrl').split(' ').forEach((pageLoadProp) => {
+      if (route.route[pageLoadProp] && !routerLoaded) {
+        routerLoaded = true;
+        router.load({ [pageLoadProp]: route.route[pageLoadProp] }, options);
+      }
+    });
+    if (routerLoaded) return;
+    // Async
+    function asyncResolve(resolveParams, resolveOptions) {
+      router.allowPageChange = false;
+      let resolvedAsModal = false;
+      if (resolveOptions && resolveOptions.context) {
+        if (!route.context) route.context = resolveOptions.context;
+        else route.context = Utils.extend({}, route.context, resolveOptions.context);
+        options.route.context = route.context;
+      }
+      ('popup popover sheet loginScreen actions customModal panel').split(' ').forEach((modalLoadProp) => {
+        if (resolveParams[modalLoadProp]) {
+          resolvedAsModal = true;
+          const modalRoute = Utils.extend({}, route, { route: resolveParams });
+          router.allowPageChange = true;
+          router.modalLoad(modalLoadProp, modalRoute, Utils.extend(options, resolveOptions));
+        }
+      });
+      if (resolvedAsModal) return;
+      router.load(resolveParams, Utils.extend(options, resolveOptions), true);
+    }
+    function asyncReject() {
+      router.allowPageChange = true;
+    }
+    if (route.route.async) {
+      router.allowPageChange = false;
+
+      route.route.async.call(router, options.route, router.currentRoute, asyncResolve, asyncReject);
+    }
   }
-  function asyncReject() {
+  function reject() {
     router.allowPageChange = true;
   }
-  if (route.route.async) {
-    router.allowPageChange = false;
 
-    route.route.async.call(router, route, router.currentRoute, asyncResolve, asyncReject);
-  }
+  processRouteQueue.call(
+    router,
+    route,
+    router.currentRoute,
+    () => {
+      if (route.route.modules) {
+        app
+          .loadModules(Array.isArray(route.route.modules) ? route.route.modules : [route.route.modules])
+          .then(() => {
+            resolve();
+          })
+          .catch(() => {
+            reject();
+          });
+      } else {
+        resolve();
+      }
+    },
+    () => {
+      reject();
+    },
+  );
+
   // Return Router
   return router;
 }

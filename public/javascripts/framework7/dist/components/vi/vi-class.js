@@ -9,7 +9,7 @@ class ViAd extends Framework7Class {
     super(params, [app]);
     const vi = this;
     if (!window.vi) {
-      throw new Error('f7:vi SDK not found.');
+      throw new Error('Framework7: vi SDK not found.');
     }
 
     let orientation;
@@ -46,10 +46,10 @@ class ViAd extends Framework7Class {
     });
 
     if (!vi.params.appId) {
-      throw new Error('Framework7:"app.id" is required to display an ad. Make sure you have specified it on app initialization.');
+      throw new Error('Framework7: "app.id" is required to display an ad. Make sure you have specified it on app initialization.');
     }
     if (!vi.params.placementId) {
-      throw new Error('Framework7:"placementId" is required to display an ad.');
+      throw new Error('Framework7: "placementId" is required to display an ad.');
     }
 
     function onResize() {
@@ -148,31 +148,37 @@ class ViAd extends Framework7Class {
       app,
     });
   }
+
   start() {
     const vi = this;
     if (vi.destroyed) return;
     if (vi.ad) vi.ad.startAd();
   }
+
   pause() {
     const vi = this;
     if (vi.destroyed) return;
     if (vi.ad) vi.ad.pauseAd();
   }
+
   resume() {
     const vi = this;
     if (vi.destroyed) return;
     if (vi.ad) vi.ad.resumeAd();
   }
+
   stop() {
     const vi = this;
     if (vi.destroyed) return;
     if (vi.ad) vi.ad.stopAd();
   }
+
   init() {
     const vi = this;
     if (vi.destroyed) return;
     if (vi.ad) vi.ad.initAd();
   }
+
   destroy() {
     const vi = this;
     vi.destroyed = true;

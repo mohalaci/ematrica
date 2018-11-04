@@ -17,13 +17,14 @@ function initClicks(app) {
       // eslint-disable-next-line
       if (clickedLink.is(app.params.clicks.externalLinks) || (url && url.indexOf('javascript:') >= 0)) {
         const target = clickedLink.attr('target');
-        if (url && (target === '_system' || target === '_blank' || target === '_browser')) {
+        if (
+          url
+          && window.cordova
+          && window.cordova.InAppBrowser
+          && (target === '_system' || target === '_blank')
+        ) {
           e.preventDefault();
-          if (target !== '_browser' && window.cordova && window.cordova.InAppBrowser) {
-            window.cordova.InAppBrowser.open(url, target);
-          } else {
-            window.open(url, target);
-          }
+          window.cordova.InAppBrowser.open(url, target);
         }
         return;
       }
@@ -48,8 +49,7 @@ function initClicks(app) {
       clickedLinkData = clickedLink.dataset();
     }
     const validUrl = url && url.length > 0 && url !== '#' && !isTabLink;
-    const template = clickedLinkData.template;
-    if (validUrl || clickedLink.hasClass('back') || template) {
+    if (validUrl || clickedLink.hasClass('back')) {
       let view;
       if (clickedLinkData.view) {
         view = $(clickedLinkData.view)[0].f7View;

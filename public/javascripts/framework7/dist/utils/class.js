@@ -15,6 +15,7 @@ class Framework7Class {
       });
     }
   }
+
   on(events, handler, priority) {
     const self = this;
     if (typeof handler !== 'function') return self;
@@ -25,6 +26,7 @@ class Framework7Class {
     });
     return self;
   }
+
   once(events, handler, priority) {
     const self = this;
     if (typeof handler !== 'function') return self;
@@ -34,13 +36,14 @@ class Framework7Class {
     }
     return self.on(events, onceHandler, priority);
   }
+
   off(events, handler) {
     const self = this;
     if (!self.eventsListeners) return self;
     events.split(' ').forEach((event) => {
       if (typeof handler === 'undefined') {
         self.eventsListeners[event] = [];
-      } else {
+      } else if (self.eventsListeners[event]) {
         self.eventsListeners[event].forEach((eventHandler, index) => {
           if (eventHandler === handler) {
             self.eventsListeners[event].splice(index, 1);
@@ -50,6 +53,7 @@ class Framework7Class {
     });
     return self;
   }
+
   emit(...args) {
     const self = this;
     if (!self.eventsListeners) return self;
@@ -90,6 +94,22 @@ class Framework7Class {
     }
     return self;
   }
+
+  // eslint-disable-next-line
+  useModuleParams(module, instanceParams) {
+    if (module.params) {
+      const originalParams = {};
+      Object.keys(module.params).forEach((paramKey) => {
+        if (typeof instanceParams[paramKey] === 'undefined') return;
+        originalParams[paramKey] = Utils.extend({}, instanceParams[paramKey]);
+      });
+      Utils.extend(instanceParams, module.params);
+      Object.keys(originalParams).forEach((paramKey) => {
+        Utils.extend(instanceParams[paramKey], originalParams[paramKey]);
+      });
+    }
+  }
+
   useModulesParams(instanceParams) {
     const instance = this;
     if (!instance.modules) return;
@@ -101,41 +121,63 @@ class Framework7Class {
       }
     });
   }
+
+  useModule(moduleName = '', moduleParams = {}) {
+    const instance = this;
+    if (!instance.modules) return;
+    const module = typeof moduleName === 'string' ? instance.modules[moduleName] : moduleName;
+    if (!module) return;
+
+    // Extend instance methods and props
+    if (module.instance) {
+      Object.keys(module.instance).forEach((modulePropName) => {
+        const moduleProp = module.instance[modulePropName];
+        if (typeof moduleProp === 'function') {
+          instance[modulePropName] = moduleProp.bind(instance);
+        } else {
+          instance[modulePropName] = moduleProp;
+        }
+      });
+    }
+    // Add event listeners
+    if (module.on && instance.on) {
+      Object.keys(module.on).forEach((moduleEventName) => {
+        instance.on(moduleEventName, module.on[moduleEventName]);
+      });
+    }
+    // Add vnode hooks
+    if (module.vnode) {
+      if (!instance.vnodeHooks) instance.vnodeHooks = {};
+      Object.keys(module.vnode).forEach((vnodeId) => {
+        Object.keys(module.vnode[vnodeId]).forEach((hookName) => {
+          const handler = module.vnode[vnodeId][hookName];
+          if (!instance.vnodeHooks[hookName]) instance.vnodeHooks[hookName] = {};
+          if (!instance.vnodeHooks[hookName][vnodeId]) instance.vnodeHooks[hookName][vnodeId] = [];
+          instance.vnodeHooks[hookName][vnodeId].push(handler.bind(instance));
+        });
+      });
+    }
+    // Module create callback
+    if (module.create) {
+      module.create.bind(instance)(moduleParams);
+    }
+  }
+
   useModules(modulesParams = {}) {
     const instance = this;
     if (!instance.modules) return;
     Object.keys(instance.modules).forEach((moduleName) => {
-      const module = instance.modules[moduleName];
       const moduleParams = modulesParams[moduleName] || {};
-      // Extend instance methods and props
-      if (module.instance) {
-        Object.keys(module.instance).forEach((modulePropName) => {
-          const moduleProp = module.instance[modulePropName];
-          if (typeof moduleProp === 'function') {
-            instance[modulePropName] = moduleProp.bind(instance);
-          } else {
-            instance[modulePropName] = moduleProp;
-          }
-        });
-      }
-      // Add event listeners
-      if (module.on && instance.on) {
-        Object.keys(module.on).forEach((moduleEventName) => {
-          instance.on(moduleEventName, module.on[moduleEventName]);
-        });
-      }
-
-      // Module create callback
-      if (module.create) {
-        module.create.bind(instance)(moduleParams);
-      }
+      instance.useModule(moduleName, moduleParams);
     });
   }
+
   static set components(components) {
     const Class = this;
     if (!Class.use) return;
     Class.use(components);
   }
+
   static installModule(module, ...params) {
     const Class = this;
     if (!Class.prototype.modules) Class.prototype.modules = {};
@@ -159,6 +201,7 @@ class Framework7Class {
     }
     return Class;
   }
+
   static use(module, ...params) {
     const Class = this;
     if (Array.isArray(module)) {

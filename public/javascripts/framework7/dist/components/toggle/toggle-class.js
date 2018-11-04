@@ -21,6 +21,7 @@ class Toggle extends Framework7Class {
     const $el = $(el);
     if ($el.length === 0) return toggle;
 
+    if ($el[0].f7Toggle) return $el[0].f7Toggle;
 
     const $inputEl = $el.children('input[type="checkbox"]');
 
@@ -134,8 +135,7 @@ class Toggle extends Framework7Class {
       toggle.emit('local::change toggleChange', toggle);
     }
     toggle.attachEvents = function attachEvents() {
-      if ("universal" !== 'desktop') {
-        if (!Support.touch) return;
+      if ("universal" !== 'desktop' && Support.touch) {
         const passive = Support.passiveListener ? { passive: true } : false;
         $el.on(app.touchEvents.start, handleTouchStart, passive);
         app.on('touchmove', handleTouchMove);
@@ -144,8 +144,7 @@ class Toggle extends Framework7Class {
       toggle.$inputEl.on('change', handleInputChange);
     };
     toggle.detachEvents = function detachEvents() {
-      if (process.env.TARGET !== 'desktop') {
-        if (!Support.touch) return;
+      if (process.env.TARGET !== 'desktop' && Support.touch) {
         const passive = Support.passiveListener ? { passive: true } : false;
         $el.off(app.touchEvents.start, handleTouchStart, passive);
         app.off('touchmove', handleTouchMove);
@@ -154,21 +153,23 @@ class Toggle extends Framework7Class {
       toggle.$inputEl.off('change', handleInputChange);
     };
 
-
     // Install Modules
     toggle.useModules();
 
     // Init
     toggle.init();
   }
+
   toggle() {
     const toggle = this;
     toggle.checked = !toggle.checked;
   }
+
   init() {
     const toggle = this;
     toggle.attachEvents();
   }
+
   destroy() {
     let toggle = this;
     toggle.$el.trigger('toggle:beforedestroy', toggle);

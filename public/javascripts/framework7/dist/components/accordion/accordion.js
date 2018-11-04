@@ -7,6 +7,12 @@ const Accordion = {
     const app = this;
     let $accordionItemEl = $clickedEl.closest('.accordion-item').eq(0);
     if (!$accordionItemEl.length) $accordionItemEl = $clickedEl.parents('li').eq(0);
+
+    const $accordionContent = $clickedEl.parents('.accordion-item-content').eq(0);
+    if ($accordionContent.length) {
+      if ($accordionContent.parents($accordionItemEl).length) return;
+    }
+
     if ($clickedEl.parents('li').length > 1 && $clickedEl.parents('li')[0] !== $accordionItemEl[0]) return;
     app.accordion.toggle($accordionItemEl);
   },
@@ -15,6 +21,7 @@ const Accordion = {
     const $el = $(el);
     const $list = $el.parents('.accordion-list').eq(0);
     let $contentEl = $el.children('.accordion-item-content');
+    $contentEl.removeAttr('aria-hidden');
     if ($contentEl.length === 0) $contentEl = $el.find('.accordion-item-content');
     if ($contentEl.length === 0) return;
     const $openedItem = $list.length > 0 && $el.parent().children('.accordion-item-opened');
@@ -25,10 +32,11 @@ const Accordion = {
       if ($el.hasClass('accordion-item-opened')) {
         $contentEl.transition(0);
         $contentEl.css('height', 'auto');
-        $contentEl._clientLeft = $contentEl[0].clientLeft;
-        $contentEl.transition('');
-        $el.trigger('accordion:opened');
-        app.emit('accordionOpened', $el[0]);
+        Utils.nextFrame(() => {
+          $contentEl.transition('');
+          $el.trigger('accordion:opened');
+          app.emit('accordionOpened', $el[0]);
+        });
       } else {
         $contentEl.css('height', '');
         $el.trigger('accordion:closed');
@@ -46,19 +54,19 @@ const Accordion = {
     let $contentEl = $el.children('.accordion-item-content');
     if ($contentEl.length === 0) $contentEl = $el.find('.accordion-item-content');
     $el.removeClass('accordion-item-opened');
+    $contentEl.attr('aria-hidden', true);
     $contentEl.transition(0);
     $contentEl.css('height', `${$contentEl[0].scrollHeight}px`);
-    $contentEl._clientLeft = $contentEl[0].clientLeft;
-    $contentEl.transition('');
     // Close
     $contentEl.transitionEnd(() => {
       if ($el.hasClass('accordion-item-opened')) {
         $contentEl.transition(0);
         $contentEl.css('height', 'auto');
-        $contentEl._clientLeft = $contentEl[0].clientLeft;
-        $contentEl.transition('');
-        $el.trigger('accordion:opened');
-        app.emit('accordionOpened', $el[0]);
+        Utils.nextFrame(() => {
+          $contentEl.transition('');
+          $el.trigger('accordion:opened');
+          app.emit('accordionOpened', $el[0]);
+        });
       } else {
         $contentEl.css('height', '');
         $el.trigger('accordion:closed');
@@ -69,7 +77,7 @@ const Accordion = {
       $contentEl.transition('');
       $contentEl.css('height', '');
       $el.trigger('accordion:close');
-      app.emit('accordionClose');
+      app.emit('accordionClose', $el[0]);
     });
   },
   toggle(el) {

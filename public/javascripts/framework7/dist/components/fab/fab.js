@@ -30,12 +30,12 @@ const Fab = {
       fab,
     };
 
-    const diffX = (fab.offset.left + (fab.width / 2)) -
-                  (target.offset.left + (target.width / 2)) -
-                  fab.translateX;
-    const diffY = (fab.offset.top + (fab.height / 2)) -
-                  (target.offset.top + (target.height / 2)) -
-                  fab.translateY;
+    const diffX = (fab.offset.left + (fab.width / 2))
+                  - (target.offset.left + (target.width / 2))
+                  - fab.translateX;
+    const diffY = (fab.offset.top + (fab.height / 2))
+                  - (target.offset.top + (target.height / 2))
+                  - fab.translateY;
     const scaleX = target.width / fab.width;
     const scaleY = target.height / fab.height;
 
@@ -50,12 +50,12 @@ const Fab = {
       target.offset = $targetEl.offset();
       fab.offset = $fabEl.offset();
 
-      const diffXNew = (fab.offset.left + (fab.width / 2)) -
-                      (target.offset.left + (target.width / 2)) -
-                      fab.translateX;
-      const diffYNew = (fab.offset.top + (fab.height / 2)) -
-                      (target.offset.top + (target.height / 2)) -
-                      fab.translateY;
+      const diffXNew = (fab.offset.left + (fab.width / 2))
+                      - (target.offset.left + (target.width / 2))
+                      - fab.translateX;
+      const diffYNew = (fab.offset.top + (fab.height / 2))
+                      - (target.offset.top + (target.height / 2))
+                      - fab.translateY;
       const scaleXNew = target.width / fab.width;
       const scaleYNew = target.height / fab.height;
 
@@ -71,12 +71,13 @@ const Fab = {
       .transform(`translate3d(${-diffX}px, ${-diffY}px, 0)`);
     $fabEl.transitionEnd(() => {
       $targetEl.transition('');
-      Utils.nextTick(() => {
+      Utils.nextFrame(() => {
         $targetEl.css('opacity', 1).transform('scale(1,1)');
+        $fabEl
+          .transform(`translate3d(${-diffX}px, ${-diffY}px, 0) scale(${scaleX}, ${scaleY})`)
+          .css('border-radius', `${borderRadius}px`)
+          .css('box-shadow', 'none');
       });
-      $fabEl.transform(`translate3d(${-diffX}px, ${-diffY}px, 0) scale(${scaleX}, ${scaleY})`)
-        .css('border-radius', `${borderRadius}px`)
-        .css('box-shadow', 'none');
       app.on('resize', $fabEl[0].f7FabMorphResizeHandler);
       if ($targetEl.parents('.page-content').length > 0) {
         $targetEl.parents('.page-content').on('scroll', $fabEl[0].f7FabMorphResizeHandler);
@@ -91,12 +92,12 @@ const Fab = {
     const { $targetEl, target, fab } = morphData;
     if ($targetEl.length === 0) return;
 
-    const diffX = (fab.offset.left + (fab.width / 2)) -
-                  (target.offset.left + (target.width / 2)) -
-                  fab.translateX;
-    const diffY = (fab.offset.top + (fab.height / 2)) -
-                  (target.offset.top + (target.height / 2)) -
-                  fab.translateY;
+    const diffX = (fab.offset.left + (fab.width / 2))
+                  - (target.offset.left + (target.width / 2))
+                  - fab.translateX;
+    const diffY = (fab.offset.top + (fab.height / 2))
+                  - (target.offset.top + (target.height / 2))
+                  - fab.translateY;
     const scaleX = target.width / fab.width;
     const scaleY = target.height / fab.height;
 
@@ -118,7 +119,7 @@ const Fab = {
         .css('z-index', '')
         .removeClass('fab-opened')
         .transform('');
-      Utils.nextTick(() => {
+      Utils.nextFrame(() => {
         $fabEl.transitionEnd(() => {
           $targetEl
             .removeClass('fab-morph-target-visible')

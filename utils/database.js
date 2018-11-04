@@ -99,7 +99,7 @@ function getProductsById(selectedProductIds, callback){
 function initProductsIfNotExist(){
     db.connect(ematricaDb, function(err, database){
         if (err){
-            //console.log(err);
+            console.log(err);
             return;
         }
         var dBase = database.db("ematrica");

@@ -70,14 +70,14 @@ class Swiper extends SwiperClass {
       if (module.params) {
         const moduleParamName = Object.keys(module.params)[0];
         const moduleParams = module.params[moduleParamName];
-        if (typeof moduleParams !== 'object') return;
+        if (typeof moduleParams !== 'object' || moduleParams === null) return;
         if (!(moduleParamName in params && 'enabled' in moduleParams)) return;
         if (params[moduleParamName] === true) {
           params[moduleParamName] = { enabled: true };
         }
         if (
-          typeof params[moduleParamName] === 'object' &&
-          !('enabled' in params[moduleParamName])
+          typeof params[moduleParamName] === 'object'
+          && !('enabled' in params[moduleParamName])
         ) {
           params[moduleParamName].enabled = true;
         }
@@ -158,6 +158,7 @@ class Swiper extends SwiperClass {
 
       // Props
       translate: 0,
+      previousTranslate: 0,
       progress: 0,
       velocity: 0,
       animating: false,
@@ -239,6 +240,7 @@ class Swiper extends SwiperClass {
     // Return app instance
     return swiper;
   }
+
   slidesPerViewDynamic() {
     const swiper = this;
     const {
@@ -271,6 +273,7 @@ class Swiper extends SwiperClass {
     }
     return spv;
   }
+
   update() {
     const swiper = this;
     if (!swiper || swiper.destroyed) return;
@@ -312,6 +315,7 @@ class Swiper extends SwiperClass {
     }
     swiper.emit('update');
   }
+
   init() {
     const swiper = this;
     if (swiper.initialized) return;
@@ -366,6 +370,7 @@ class Swiper extends SwiperClass {
     // Emit
     swiper.emit('init');
   }
+
   destroy(deleteInstance = true, cleanStyles = true) {
     const swiper = this;
     const {
@@ -425,18 +430,23 @@ class Swiper extends SwiperClass {
 
     return null;
   }
+
   static extendDefaults(newDefaults) {
     Utils.extend(extendedDefaults, newDefaults);
   }
+
   static get extendedDefaults() {
     return extendedDefaults;
   }
+
   static get defaults() {
     return defaults;
   }
+
   static get Class() {
     return SwiperClass;
   }
+
   static get $() {
     return $;
   }

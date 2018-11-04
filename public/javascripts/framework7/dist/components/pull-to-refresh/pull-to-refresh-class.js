@@ -128,7 +128,19 @@ class PullToRefresh extends Framework7Class {
 
       if (!isMoved) {
         $el.removeClass('ptr-transitioning');
-        if (scrollTop > $el[0].offsetHeight) {
+        let targetIsEl;
+        let targetIsScrollable;
+        $(e.target).parents().each((index, targetEl) => {
+          if (targetEl === el) {
+            targetIsEl = true;
+          }
+          if (targetIsEl) return;
+          if (targetEl.scrollHeight > targetEl.offsetHeight) {
+            targetIsScrollable = true;
+          }
+        });
+
+        if (targetIsScrollable || scrollTop > $el[0].offsetHeight) {
           isTouched = false;
           return;
         }
@@ -257,10 +269,12 @@ class PullToRefresh extends Framework7Class {
 
     return ptr;
   }
+
   init() {
     const ptr = this;
     ptr.attachEvents();
   }
+
   destroy() {
     let ptr = this;
     ptr.emit('local::beforeDestroy ptrBeforeDestroy', ptr);

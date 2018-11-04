@@ -108,7 +108,8 @@ function initTouch() {
     if (el.nodeName.toLowerCase() === 'input' && (el.type === 'file' || el.type === 'range')) return false;
     if (el.nodeName.toLowerCase() === 'select' && Device.android) return false;
     if ($el.hasClass('no-fastclick') || $el.parents('.no-fastclick').length > 0) return false;
-    if (params.fastClicksExclude && $el.is(params.fastClicksExclude)) return false;
+    if (params.fastClicksExclude && $el.closest(params.fastClicksExclude).length > 0) return false;
+
     return true;
   }
   function targetNeedsFocus(el) {
@@ -148,7 +149,8 @@ function initTouch() {
         return false;
       }
       return $el;
-    } else if ($el.parents(rippleElements).length > 0) {
+    }
+    if ($el.parents(rippleElements).length > 0) {
       const rippleParent = $el.parents(rippleElements).eq(0);
       if (rippleParent.hasClass('no-ripple')) {
         return false;
@@ -278,9 +280,9 @@ function initTouch() {
     if (Device.ios || (Device.android && 'getSelection' in window)) {
       const selection = window.getSelection();
       if (
-        selection.rangeCount &&
-        selection.focusNode !== document.body &&
-        (!selection.isCollapsed || document.activeElement === selection.focusNode)
+        selection.rangeCount
+        && selection.focusNode !== document.body
+        && (!selection.isCollapsed || document.activeElement === selection.focusNode)
       ) {
         activeSelection = true;
         return true;

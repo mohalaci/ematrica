@@ -54,7 +54,7 @@ function SwipeBack(r) {
     const pageX = e.type === 'touchmove' ? e.targetTouches[0].pageX : e.pageX;
     const pageY = e.type === 'touchmove' ? e.targetTouches[0].pageY : e.pageY;
     if (typeof isScrolling === 'undefined') {
-      isScrolling = !!(isScrolling || Math.abs(pageY - touchesStart.y) > Math.abs(pageX - touchesStart.x)) || pageX < touchesStart.x;
+      isScrolling = !!(isScrolling || Math.abs(pageY - touchesStart.y) > Math.abs(pageX - touchesStart.x)) || (pageX < touchesStart.x && !app.rtl) || (pageX > touchesStart.x && app.rtl);
     }
     if (isScrolling || e.f7PreventSwipeBack || app.preventSwipeBack) {
       isTouched = false;
@@ -125,10 +125,8 @@ function SwipeBack(r) {
           }
           if (previousNavbar.hasClass('sliding')) {
             previousNavBackIcon = previousNavbar.children('.left').find('.back .icon');
-            // previousNavBackIconText = previousNavbar.children('left').find('.back span').eq(0);
           } else {
             previousNavBackIcon = previousNavbar.children('.left.sliding').find('.back .icon');
-            // previousNavBackIconText = previousNavbar.children('.left.sliding').find('.back span').eq(0);
           }
         }
       }
@@ -169,6 +167,9 @@ function SwipeBack(r) {
       currentPageTranslate = Math.round(currentPageTranslate);
       previousPageTranslate = Math.round(previousPageTranslate);
     }
+
+    router.swipeBackActive = true;
+    $([currentPage[0], previousPage[0]]).addClass('page-swipeback-active');
 
     currentPage.transform(`translate3d(${currentPageTranslate}px,0,0)`);
     if (paramsSwipeBackAnimateShadow) pageShadow[0].style.opacity = 1 - (1 * percentage);
@@ -232,6 +233,8 @@ function SwipeBack(r) {
     }
     isTouched = false;
     isMoved = false;
+    router.swipeBackActive = false;
+    $([currentPage[0], previousPage[0]]).removeClass('page-swipeback-active');
     if (touchesDiff === 0) {
       $([currentPage[0], previousPage[0]]).transform('');
       if (pageShadow && pageShadow.length > 0) pageShadow.remove();
@@ -248,8 +251,8 @@ function SwipeBack(r) {
     let pageChanged = false;
     // Swipe back to previous page
     if (
-      (timeDiff < 300 && touchesDiff > 10) ||
-      (timeDiff >= 300 && touchesDiff > viewContainerWidth / 2)
+      (timeDiff < 300 && touchesDiff > 10)
+      || (timeDiff >= 300 && touchesDiff > viewContainerWidth / 2)
     ) {
       currentPage.removeClass('page-current').addClass(`page-next${app.theme === 'md' ? ' page-next-on-right' : ''}`);
       previousPage.removeClass('page-previous').addClass('page-current').removeAttr('aria-hidden');
@@ -298,10 +301,10 @@ function SwipeBack(r) {
 
     // Swipe Back Callback
     const callbackData = {
-      currentPage: currentPage[0],
-      previousPage: previousPage[0],
-      currentNavbar: currentNavbar[0],
-      previousNavbar: previousNavbar[0],
+      currentPageEl: currentPage[0],
+      previousPageEl: previousPage[0],
+      currentNavbarEl: currentNavbar[0],
+      previousNavbarEl: previousNavbar[0],
     };
 
     if (pageChanged) {

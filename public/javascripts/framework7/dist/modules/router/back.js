@@ -1,8 +1,10 @@
 import $ from 'dom7';
 import { document } from 'ssr-window';
 import Utils from '../../utils/utils';
+import Device from '../../utils/device';
 import History from '../../utils/history';
 import redirect from './redirect';
+import processRouteQueue from './process-route-queue';
 
 function backward(el, backwardOptions) {
   const router = this;
@@ -197,9 +199,11 @@ function backward(el, backwardOptions) {
   }
 
   // History State
-  if (router.params.pushState && options.pushState) {
-    if (backIndex) History.go(-backIndex);
-    else History.back();
+  if (!(Device.ie || Device.edge || (Device.firefox && !Device.ios))) {
+    if (router.params.pushState && options.pushState) {
+      if (backIndex) History.go(-backIndex);
+      else History.back();
+    }
   }
 
   // Update History
@@ -219,6 +223,14 @@ function backward(el, backwardOptions) {
 
   // Current Route
   router.currentRoute = options.route;
+
+  // History State
+  if (Device.ie || Device.edge || (Device.firefox && !Device.ios)) {
+    if (router.params.pushState && options.pushState) {
+      if (backIndex) History.go(-backIndex);
+      else History.back();
+    }
+  }
 
   // Insert Page
   insertPage();
@@ -273,7 +285,7 @@ function backward(el, backwardOptions) {
 
     // Preload previous page
     const preloadPreviousPage = app.theme === 'ios' ? (router.params.preloadPreviousPage || router.params.iosSwipeBack) : router.params.preloadPreviousPage;
-    if (preloadPreviousPage) {
+    if (preloadPreviousPage && router.history[router.history.length - 2]) {
       router.back(router.history[router.history.length - 2], { preload: true });
     }
     if (router.params.pushState) {
@@ -312,10 +324,10 @@ function loadBack(backParams, backOptions, ignorePageChange) {
   const { url, content, el, pageName, template, templateUrl, component, componentUrl } = params;
 
   if (
-    options.route.url &&
-    router.url === options.route.url &&
-    !(options.reloadCurrent || options.reloadPrevious) &&
-    !router.params.allowDuplicateUrls
+    options.route.url
+    && router.url === options.route.url
+    && !(options.reloadCurrent || options.reloadPrevious)
+    && !router.params.allowDuplicateUrls
   ) {
     return false;
   }
@@ -379,8 +391,11 @@ function loadBack(backParams, backOptions, ignorePageChange) {
   return router;
 }
 function back(...args) {
+  const router = this;
+  if (router.swipeBackActive) return router;
   let navigateUrl;
   let navigateOptions;
+  let route;
   if (typeof args[0] === 'object') {
     navigateOptions = args[0] || {};
   } else {
@@ -388,17 +403,34 @@ function back(...args) {
     navigateOptions = args[1] || {};
   }
 
-  const router = this;
+  const { name, params, query } = navigateOptions;
+  if (name) {
+    // find route by name
+    route = router.findRouteByKey('name', name);
+    if (!route) {
+      throw new Error(`Framework7: route with name "${name}" not found`);
+    }
+    navigateUrl = router.constructRouteUrl(route, { params, query });
+    if (navigateUrl) {
+      return router.back(navigateUrl, Utils.extend({}, navigateOptions, {
+        name: null,
+        params: null,
+        query: null,
+      }));
+    }
+    throw new Error(`Framework7: can't construct URL for route with name "${name}"`);
+  }
+
   const app = router.app;
   if (!router.view) {
-    app.views.main.router.back(navigateUrl, navigateOptions);
+    app.views.main.router.back(...args);
     return router;
   }
 
   let currentRouteIsModal = router.currentRoute.modal;
   let modalType;
   if (!currentRouteIsModal) {
-    ('popup popover sheet loginScreen actions customModal').split(' ').forEach((modalLoadProp) => {
+    ('popup popover sheet loginScreen actions customModal panel').split(' ').forEach((modalLoadProp) => {
       if (router.currentRoute.route[modalLoadProp]) {
         currentRouteIsModal = true;
         modalType = modalLoadProp;
@@ -406,11 +438,22 @@ function back(...args) {
     });
   }
   if (currentRouteIsModal) {
-    const modalToClose = router.currentRoute.modal ||
-                         router.currentRoute.route.modalInstance ||
-                         app[modalType].get();
+    const modalToClose = router.currentRoute.modal
+                         || router.currentRoute.route.modalInstance
+                         || app[modalType].get();
     const previousUrl = router.history[router.history.length - 2];
-    let previousRoute = router.findMatchingRoute(previousUrl);
+    let previousRoute;
+    // check if previous route is modal too
+    if (modalToClose && modalToClose.$el) {
+      const prevOpenedModals = modalToClose.$el.prevAll('.modal-in');
+      if (prevOpenedModals.length && prevOpenedModals[0].f7Modal) {
+        previousRoute = prevOpenedModals[0].f7Modal.route;
+      }
+    }
+    if (!previousRoute) {
+      previousRoute = router.findMatchingRoute(previousUrl);
+    }
+
     if (!previousRoute && previousUrl) {
       previousRoute = {
         url: previousUrl,
@@ -436,13 +479,30 @@ function back(...args) {
   }
   const $previousPage = router.$el.children('.page-current').prevAll('.page-previous').eq(0);
   if (!navigateOptions.force && $previousPage.length > 0) {
-    if (router.params.pushState && $previousPage[0].f7Page && router.history[router.history.length - 2] !== $previousPage[0].f7Page.route.url) {
-      router.back(router.history[router.history.length - 2], Utils.extend(navigateOptions, { force: true }));
+    if (router.params.pushState
+      && $previousPage[0].f7Page
+      && router.history[router.history.length - 2] !== $previousPage[0].f7Page.route.url
+    ) {
+      router.back(
+        router.history[router.history.length - 2],
+        Utils.extend(navigateOptions, { force: true })
+      );
       return router;
     }
-    router.loadBack({ el: $previousPage }, Utils.extend(navigateOptions, {
-      route: $previousPage[0].f7Page.route,
-    }));
+
+    const previousPageRoute = $previousPage[0].f7Page.route;
+    processRouteQueue.call(
+      router,
+      previousPageRoute,
+      router.currentRoute,
+      () => {
+        router.loadBack({ el: $previousPage }, Utils.extend(navigateOptions, {
+          route: previousPageRoute,
+        }));
+      },
+      () => {}
+    );
+
     return router;
   }
 
@@ -458,7 +518,7 @@ function back(...args) {
   }
 
   // Find route to load
-  let route = router.findMatchingRoute(navigateUrl);
+  route = router.findMatchingRoute(navigateUrl);
   if (!route) {
     if (navigateUrl) {
       route = {
@@ -492,37 +552,77 @@ function back(...args) {
     options.route.context = options.context;
   }
 
+  let backForceLoaded;
   if (options.force && router.params.stackPages) {
     router.$el.children('.page-previous.stacked').each((index, pageEl) => {
       if (pageEl.f7Page && pageEl.f7Page.route && pageEl.f7Page.route.url === route.url) {
+        backForceLoaded = true;
         router.loadBack({ el: pageEl }, options);
       }
     });
+    if (backForceLoaded) {
+      return router;
+    }
   }
+  function resolve() {
+    let routerLoaded = false;
+    ('url content component pageName el componentUrl template templateUrl').split(' ').forEach((pageLoadProp) => {
+      if (route.route[pageLoadProp] && !routerLoaded) {
+        routerLoaded = true;
+        router.loadBack({ [pageLoadProp]: route.route[pageLoadProp] }, options);
+      }
+    });
+    if (routerLoaded) return;
+    // Async
+    function asyncResolve(resolveParams, resolveOptions) {
+      router.allowPageChange = false;
+      if (resolveOptions && resolveOptions.context) {
+        if (!route.context) route.context = resolveOptions.context;
+        else route.context = Utils.extend({}, route.context, resolveOptions.context);
+        options.route.context = route.context;
+      }
+      router.loadBack(resolveParams, Utils.extend(options, resolveOptions), true);
+    }
+    function asyncReject() {
+      router.allowPageChange = true;
+    }
+    if (route.route.async) {
+      router.allowPageChange = false;
 
-  ('url content component pageName el componentUrl template templateUrl').split(' ').forEach((pageLoadProp) => {
-    if (route.route[pageLoadProp]) {
-      router.loadBack({ [pageLoadProp]: route.route[pageLoadProp] }, options);
+      route.route.async.call(router, route, router.currentRoute, asyncResolve, asyncReject);
     }
-  });
-  // Async
-  function asyncResolve(resolveParams, resolveOptions) {
-    router.allowPageChange = false;
-    if (resolveOptions && resolveOptions.context) {
-      if (!route.context) route.context = resolveOptions.context;
-      else route.context = Utils.extend({}, route.context, resolveOptions.context);
-      options.route.context = route.context;
-    }
-    router.loadBack(resolveParams, Utils.extend(options, resolveOptions), true);
   }
-  function asyncReject() {
+  function reject() {
     router.allowPageChange = true;
   }
-  if (route.route.async) {
-    router.allowPageChange = false;
 
-    route.route.async.call(router, route, router.currentRoute, asyncResolve, asyncReject);
+  if (options.preload) {
+    resolve();
+  } else {
+    processRouteQueue.call(
+      router,
+      route,
+      router.currentRoute,
+      () => {
+        if (route.route.modules) {
+          app
+            .loadModules(Array.isArray(route.route.modules) ? route.route.modules : [route.route.modules])
+            .then(() => {
+              resolve();
+            })
+            .catch(() => {
+              reject();
+            });
+        } else {
+          resolve();
+        }
+      },
+      () => {
+        reject();
+      },
+    );
   }
+
   // Return Router
   return router;
 }
