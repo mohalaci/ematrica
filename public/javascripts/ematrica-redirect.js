@@ -57,7 +57,7 @@ app.on('init', function() {
 });
 
 $$(document).on('DOMContentLoaded', function(){
-    $$(document).on('click', "#exitButton", BarionMarket.getInstance().closePlugin);
+    $$(document).on('click', "#exitButton", BarionMarket.getInstance().closePlugin());
 
     $$(document).on('click', ".navbar, .statusbar", function (e) {
         e.preventDefault();
