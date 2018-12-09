@@ -12,6 +12,7 @@ class Searchbar extends FrameworkClass {
     const defaults = {
       el: undefined,
       inputEl: undefined,
+      inputEvents: 'change input compositionend',
       disableButton: true,
       disableButtonEl: undefined,
       backdropEl: undefined,
@@ -53,9 +54,8 @@ class Searchbar extends FrameworkClass {
     } else {
       $navbarEl = $el.parents('.navbar-inner');
       if ($navbarEl.length > 0) {
-        if ($navbarEl[0].f7Page) {
-          $pageEl = $navbarEl[0].f7Page.$el;
-        } else {
+        $pageEl = $(app.navbar.getPageByEl($navbarEl[0]));
+        if (!$pageEl.length) {
           const $currentPageEl = $el.parents('.view').find('.page-current');
           if ($currentPageEl[0] && $currentPageEl[0].f7Page && $currentPageEl[0].f7Page.navbarEl === $navbarEl[0]) {
             $pageEl = $currentPageEl;
@@ -226,7 +226,7 @@ class Searchbar extends FrameworkClass {
       }
       sb.$inputEl.on('focus', onInputFocus);
       sb.$inputEl.on('blur', onInputBlur);
-      sb.$inputEl.on('change input compositionend', onInputChange);
+      sb.$inputEl.on(sb.params.inputEvents, onInputChange);
       sb.$inputEl.on('input:clear', onInputClear);
     };
     sb.detachEvents = function detachEvents() {
@@ -243,7 +243,7 @@ class Searchbar extends FrameworkClass {
       }
       sb.$inputEl.off('focus', onInputFocus);
       sb.$inputEl.off('blur', onInputBlur);
-      sb.$inputEl.off('change input compositionend', onInputChange);
+      sb.$inputEl.off(sb.params.inputEvents, onInputChange);
       sb.$inputEl.off('input:clear', onInputClear);
     };
 
@@ -276,11 +276,9 @@ class Searchbar extends FrameworkClass {
     sb.$disableButtonEl.transition(0).show();
     sb.$disableButtonEl.css(`margin-${app.rtl ? 'left' : 'right'}`, `${-sb.disableButtonEl.offsetWidth}px`);
     /* eslint no-underscore-dangle: ["error", { "allow": ["_clientLeft"] }] */
-    // sb._clientLeft = sb.$disableButtonEl[0].clientLeft;
-    Utils.nextFrame(() => {
-      sb.$disableButtonEl.transition('');
-      sb.disableButtonHasMargin = true;
-    });
+    sb._clientLeft = sb.$disableButtonEl[0].clientLeft;
+    sb.$disableButtonEl.transition('');
+    sb.disableButtonHasMargin = true;
   }
 
   enable(setFocus) {

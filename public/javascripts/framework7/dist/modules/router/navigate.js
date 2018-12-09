@@ -15,9 +15,9 @@ function refreshPage() {
 
 function forward(el, forwardOptions = {}) {
   const router = this;
+  const $el = $(el);
   const app = router.app;
   const view = router.view;
-
   const options = Utils.extend(false, {
     animate: router.params.animate,
     pushState: true,
@@ -66,13 +66,19 @@ function forward(el, forwardOptions = {}) {
   const separateNavbar = router.separateNavbar;
 
   const $viewEl = router.$el;
-  const $newPage = $(el);
+  const $newPage = $el;
   const reload = options.reloadPrevious || options.reloadCurrent || options.reloadAll;
   let $oldPage;
 
   let $navbarEl;
   let $newNavbarInner;
   let $oldNavbarInner;
+
+  router.allowPageChange = false;
+  if ($newPage.length === 0) {
+    router.allowPageChange = true;
+    return router;
+  }
 
   if ($newPage.length) {
     // Remove theme elements
@@ -86,17 +92,18 @@ function forward(el, forwardOptions = {}) {
       if ($newNavbarInner.length > 0) {
         $newPage.children('.navbar').remove();
       }
-      if ($newNavbarInner.length === 0 && $newPage[0].f7Page) {
+      if ($newNavbarInner.length === 0 && $newPage[0] && $newPage[0].f7Page) {
         // Try from pageData
         $newNavbarInner = $newPage[0].f7Page.$navbarEl;
       }
     }
   }
 
-  router.allowPageChange = false;
-  if ($newPage.length === 0) {
-    router.allowPageChange = true;
-    return router;
+  // Save Keep Alive Cache
+  if (options.route && options.route.route && options.route.route.keepAlive && !options.route.route.keepAliveData) {
+    options.route.route.keepAliveData = {
+      pageEl: $el[0],
+    };
   }
 
   // Pages In View
@@ -127,7 +134,9 @@ function forward(el, forwardOptions = {}) {
   }
   $newPage
     .addClass(`page-${newPagePosition}`)
-    .removeClass('stacked');
+    .removeClass('stacked')
+    .trigger('page:unstack')
+    .trigger('page:position', { position: newPagePosition });
 
   if (dynamicNavbar && $newNavbarInner.length) {
     $newNavbarInner
@@ -160,6 +169,7 @@ function forward(el, forwardOptions = {}) {
         const oldNavbarInnerEl = app.navbar.getElByPage($pagesInView.eq(i));
         if (router.params.stackPages) {
           $pagesInView.eq(i).addClass('stacked');
+          $pagesInView.eq(i).trigger('page:stack');
           if (separateNavbar) {
             // $navbarsInView.eq(i).addClass('stacked');
             $(oldNavbarInnerEl).addClass('stacked');
@@ -268,12 +278,16 @@ function forward(el, forwardOptions = {}) {
   }
   if (!newPageInDom) {
     router.pageCallback('mounted', $newPage, $newNavbarInner, newPagePosition, reload ? newPagePosition : 'current', options, $oldPage);
+  } else if (options.route && options.route.route && options.route.route.keepAlive && !$newPage[0].f7PageMounted) {
+    $newPage[0].f7PageMounted = true;
+    router.pageCallback('mounted', $newPage, $newNavbarInner, newPagePosition, reload ? newPagePosition : 'current', options, $oldPage);
   }
 
   // Remove old page
   if (options.reloadCurrent && $oldPage.length > 0) {
     if (router.params.stackPages && router.initialPages.indexOf($oldPage[0]) >= 0) {
       $oldPage.addClass('stacked');
+      $oldPage.trigger('page:stack');
       if (separateNavbar) {
         $oldNavbarInner.addClass('stacked');
       }
@@ -291,6 +305,7 @@ function forward(el, forwardOptions = {}) {
       const $oldNavbarInnerEl = $(app.navbar.getElByPage($oldPageEl));
       if (router.params.stackPages && router.initialPages.indexOf($oldPageEl[0]) >= 0) {
         $oldPageEl.addClass('stacked');
+        $oldPageEl.trigger('page:stack');
         if (separateNavbar) {
           $oldNavbarInnerEl.addClass('stacked');
         }
@@ -306,6 +321,7 @@ function forward(el, forwardOptions = {}) {
   } else if (options.reloadPrevious) {
     if (router.params.stackPages && router.initialPages.indexOf($oldPage[0]) >= 0) {
       $oldPage.addClass('stacked');
+      $oldPage.trigger('page:stack');
       if (separateNavbar) {
         $oldNavbarInner.addClass('stacked');
       }
@@ -370,6 +386,7 @@ function forward(el, forwardOptions = {}) {
     if (!keepOldPage) {
       if (router.params.stackPages) {
         $oldPage.addClass('stacked');
+        $oldPage.trigger('page:stack');
         if (separateNavbar) {
           $oldNavbarInner.addClass('stacked');
         }
@@ -595,10 +612,11 @@ function navigate(navigateParams, navigateOptions = {}) {
 
   const options = {};
   if (route.route.options) {
-    Utils.extend(options, route.route.options, navigateOptions, { route });
+    Utils.extend(options, route.route.options, navigateOptions);
   } else {
-    Utils.extend(options, navigateOptions, { route });
+    Utils.extend(options, navigateOptions);
   }
+  options.route = route;
 
   if (options && options.context) {
     route.context = options.context;
@@ -613,10 +631,14 @@ function navigate(navigateParams, navigateOptions = {}) {
         router.modalLoad(modalLoadProp, route, options);
       }
     });
+    if (route.route.keepAlive && route.route.keepAliveData) {
+      router.load({ el: route.route.keepAliveData.pageEl }, options, false);
+      routerLoaded = true;
+    }
     ('url content component pageName el componentUrl template templateUrl').split(' ').forEach((pageLoadProp) => {
       if (route.route[pageLoadProp] && !routerLoaded) {
         routerLoaded = true;
-        router.load({ [pageLoadProp]: route.route[pageLoadProp] }, options);
+        router.load({ [pageLoadProp]: route.route[pageLoadProp] }, options, false);
       }
     });
     if (routerLoaded) return;

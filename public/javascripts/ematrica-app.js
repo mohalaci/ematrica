@@ -116,7 +116,8 @@ var app = new Framework7({
 
 var $$ = Dom7;
 
-var barionMarket = new BarionMarket();
+//var barionMarket = new BarionMarket();
+//var bMarket = new Market(true);
 var mainView = app.views.create('.view-main');
 mainView.router.allowPageChange = true;
 
@@ -235,6 +236,18 @@ function setDefaultValidity() {
     $$(".validity-range").text($data.getValidityRange());
 }
 
+function selectVehicle(){
+    BarionMarket.getInstance().selectVehicle(
+        function(vehicle){
+            setVehicle(vehicle);
+        }
+    );
+}
+
+function closePlugin(){
+    BarionMarket.getInstance().closePlugin();
+}
+
 $$(document).on('DOMContentLoaded', function(){
 
     //pre-complie templates
@@ -270,11 +283,11 @@ $$(document).on('DOMContentLoaded', function(){
 
     $$(document).on('click', "#payWithBarionButton", startPayment);
     $$(document).on('click', "#buyVignetteButton", startPayment);
-    $$(document).on('click', "#setShippingButton", barionMarket.getShippingAddress);
-    $$(document).on('click', "#resultButton", barionMarket.closePlugin);
-    $$(document).on('click', "#exitButton", barionMarket.closePlugin);
-    $$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
-    $$(document).on('click', "#changeVehicleButton", barionMarket.getVehicle);
+    //$$(document).on('click', "#setShippingButton", barionMarket.getShippingAddress);
+    $$(document).on('click', "#resultButton", closePlugin);
+    $$(document).on('click', "#exitButton", closePlugin);
+    //$$(document).on('click', "#changeAddressButton", barionMarket.selectAddress);
+    $$(document).on('click', "#changeVehicleButton", selectVehicle);
 
     $$(document).on('click', "#selectVignetteType", function(){
         var selectedVignetteId = $$(this).attr("data-vignette-id");
@@ -378,12 +391,12 @@ function startPayment() {
     app.request({
         method: "POST",
         url: "/payment/start",
-        data: JSON.stringify({
+        data: {
             vIds: vignettes,
             locale: "hu-HU",
             currency: "HUF"
 
-        }),
+        },
         contentType: "application/json",
         traditional: true,
         dataType: "json",

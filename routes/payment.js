@@ -76,10 +76,12 @@ router.post('/start', urlencodedParser, function (req, res, next) {
     if (req.body == null || req.body == undefined) {
         var resp = { error: "body is null" };
         var respJson = JSON.stringify(resp);
+        console.log(respJson);
         db.saveNetworkLog("BackEnd", "Client", respJson);
         res.status(400).json(resp);
         return;
     }
+    console.log("lsdfslfsldfslfsdf");
 
     db.saveNetworkLog("Client", "Payment/Start", JSON.stringify(req.body));
 
