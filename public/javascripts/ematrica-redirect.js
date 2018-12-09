@@ -40,7 +40,6 @@ var app = new Framework7({
 });
 
 var $$ = Dom7;
-var barionMarket = new BarionMarket();
 var mainView = app.views.create('.view-main');
 
 app.statusbar.setIosTextColor('white');
@@ -58,7 +57,7 @@ app.on('init', function() {
 });
 
 $$(document).on('DOMContentLoaded', function(){
-    $$(document).on('click', "#exitButton", barionMarket.closePlugin);
+    $$(document).on('click', "#exitButton", BarionMarket.getInstance().closePlugin);
 
     $$(document).on('click', ".navbar, .statusbar", function (e) {
         e.preventDefault();
