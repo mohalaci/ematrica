@@ -271,6 +271,10 @@ $$(document).on('DOMContentLoaded', function(){
     $cContentTemplate = Template7.compile(contentTemplate);
 
     initMainPage();
+
+    BarionMarket.getInstance().getLastUsedVehicle(function(vehicle){
+        setVehicle(vehicle);
+    })
     
     if ($$('html.device-ios').length > 0) {
         $$('body').scrollTop(20);
