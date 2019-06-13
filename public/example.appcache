@@ -1,0 +1,46 @@
+CACHE MANIFEST
+# This is a comment.
+# Cache manifest version 0.0.1
+# If you change the version number in this comment,
+# the cache manifest is no longer byte-for-byte
+# identical.
+ 
+img/loading.gif
+img/vehicle_bus.png
+img/vehicle_car.png
+img/vehicle_motor.png
+img/vehicle_trailer.png
+img/vehicle_truck.png
+img/vehicle_van.png
+
+stylesheets/icons.css
+stylesheets/icons.min.css
+stylesheets/framework7.barion.css
+stylesheets/framework7.barion.min.css
+stylesheets/my.css
+stylesheets/my.min.css
+stylesheets/style.css
+
+javascripts/BarionMarket.js
+javascripts/ematrica-app.js
+javascripts/ematrica-redirect.js
+javascripts/framework7/dist/js/framework7.min.js.map
+javascripts/framework7/dist/js/framework7.min.js
+javascripts/framework7/dist/css/framework7.ios.min.css
+
+
+ 
+NETWORK:
+# All URLs that start with the following lines
+# are whitelisted.
+/payment
+/redirect
+/network
+
+ 
+CACHE:
+# Additional items to cache.
+#demoimages/stonessmall.jpg
+ 
+FALLBACK:
+#demoimages/currentImg.jpg images/stockImage.jpg

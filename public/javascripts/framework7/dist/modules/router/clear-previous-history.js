@@ -1,15 +1,18 @@
 import $ from 'dom7';
+import appRouterCheck from './app-router-check';
 
 function clearPreviousPages() {
   const router = this;
+  appRouterCheck(router, 'clearPreviousPages');
   const app = router.app;
   const separateNavbar = router.separateNavbar;
 
-  const $currentPageEl = $(router.currentPageEl);
-
   const $pagesToRemove = router.$el
     .children('.page')
-    .filter((index, pageInView) => pageInView !== $currentPageEl[0]);
+    .filter((index, pageInView) => {
+      if (router.currentRoute && (router.currentRoute.modal || router.currentRoute.panel)) return true;
+      return pageInView !== router.currentPageEl;
+    });
 
   $pagesToRemove.each((index, pageEl) => {
     const $oldPageEl = $(pageEl);
@@ -32,6 +35,7 @@ function clearPreviousPages() {
 
 function clearPreviousHistory() {
   const router = this;
+  appRouterCheck(router, 'clearPreviousHistory');
   const url = router.history[router.history.length - 1];
 
   router.clearPreviousPages();

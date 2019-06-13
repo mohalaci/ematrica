@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html manifest="/example.appcache">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -14,7 +14,10 @@
     <link rel="stylesheet" href="./../stylesheets/framework7.barion.css">
 </head>
 <body>
-    <div id="app">
+    <script type="text/javascript">
+        console.log(document.body.clientHeight);
+        </script>
+    <div id="app" >
         <div class="statusbar"></div>
         <div class="view view-main">
 

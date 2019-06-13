@@ -13,46 +13,15 @@ var BarionMarket = (function(){
      * Testing data
      */
     BarionMarket.prototype.testData = {
-        selectAddress: "{\"countryCode\":\"HU\",\"city\":\"Budapest\",\"street\":\"Infopark setany\",\"streetNumber\":\"1\",\"postalCode\":\"1117\",\"firstName\":\"Kovacs\",\"lastName\":\"Istvan\",\"companyName\":null}"
-        /*JSON.stringify({
-                countryCode: "HU",
-                city: "Budapest",
-                street: "Infopark setany",
-                streetNumber: "1",
-                postalCode: "1117",
-                firstName: "Kovacs",
-                lastName: "Istvan",
-                companyName: null
-        })*/,
-        getDefaultAddress: "{\"countryCode\":\"HU\",\"city\":\"Budapest\",\"street\":\"Infopark setany\",\"streetNumber\":\"1\",\"postalCode\":\"1117\",\"firstName\":\"Kovacs\",\"lastName\":\"Istvan\",\"companyName\":null}"
-        /*JSON.stringify({
-                countryCode: "HU",
-                city: "Budapest",
-                street: "Infopark setany",
-                streetNumber: "1",
-                postalCode: "1117",
-                firstName: "Kovacs",
-                lastName: "Istvan",
-                companyName: null
-        })*/,
-        selectVehicle: "{\"licensePlate\":\"TEST001\",\"countryCode\":\"HU\",\"category\":\"CAR\"}"
-        /*JSON.stringify({
-            licensePlate: "TEST001",
-            countryCode: "HU",
-            category: "CAR"
-        })*/,
-        getCustomer: "{\"loginName\":\"asd@example.com\",\"language\":\"hu_HU\",\"token\":\"123456\"}"
-        /*JSON.stringify({
-            loginName: "asd@example.com",
-            language: "hu_HU",
-            token: "123456"
-        })*/,
+        selectAddress: "{\"location\": {\"region\": \"Fejer\",\"city\": \"Moha\",\"street\": \"Dozsa Utca\",\"postalCode\": \"8042\",\"stairway\": \"\",\"floor\": \"\",\"countryCode\": \"HU\",\"houseNumber\": \"6\",\"door\": \"\",\"doorBell\": \"\"},\"noteForDelivery\": \"\",\"customerName\": {\"firstName\": \"Takacs\",\"organizationName\": \"\",\"lastName\": \"Laszlo\"},\"phoneNumber\": \"\",\"taxNumber\": \"\",\"addressType\": \"Individual\",\"name\": \"\"}",
+        
+        getDefaultAddress: "{\"location\": {\"region\": \"Fejer\",\"city\": \"Moha\",\"street\": \"Dozsa Utca\",\"postalCode\": \"8042\",\"stairway\": \"\",\"floor\": \"\",\"countryCode\": \"HU\",\"houseNumber\": \"6\",\"door\": \"\",\"doorBell\": \"\"},\"noteForDelivery\": \"\",\"customerName\": {\"firstName\": \"Takacs\",\"organizationName\": \"\",\"lastName\": \"Laszlo\"},\"phoneNumber\": \"\",\"taxNumber\": \"\",\"addressType\": \"Individual\",\"name\": \"\"}",
+        
+        selectVehicle: "{\"licensePlate\":\"TEST001\",\"countryCode\":\"HU\",\"category\":\"CAR\"}",
+
+        getCustomer: "{\"loginName\":\"asd@example.com\",\"language\":\"hu_HU\",\"token\":\"123456\"}",
+        
         getLastUsedVehicle: "{\"licensePlate\":\"TEST001\",\"countryCode\":\"HU\",\"category\":\"CAR\"}"
-        /*JSON.stringify({
-            licensePlate: "TEST001",
-            countryCode: "HU",
-            category: "CAR"
-        })*/
     }
 
     /**
@@ -151,25 +120,29 @@ var BarionMarket = (function(){
         if (typeof handler != "undefined" && handler != null) {
             handler.postMessage(message);
         } else {
-            switch (callback) {
-                case this.callbacks.vehicle: 
-                    callback(this.testData.selectVehicle);
-                    break;
-                case this.callbacks.address:
-                    callback(this.testData.selectAddress);
-                    break;
-                case this.callbacks.defaultAddress:
-                    callback(this.testData.getDefaultAddress);
-                    break;
-                case this.callbacks.customer:
-                    callback(this.testData.getCustomer);
-                    break;
-                case this.callbacks.lastUsedVehicle:
-                    callback(this.testData.getLastUsedVehicle);
-                    break;
-                default:
-                    alert("Plugin closed");
-                    break;
+            if (callback == null || callback == "undefined"){
+                alert("Plugin closed");
+            } else {
+                switch (callback) {
+                    case this.callbacks.vehicle: 
+                        callback(this.testData.selectVehicle);
+                        break;
+                    case this.callbacks.address:
+                        callback(this.testData.selectAddress);
+                        break;
+                    case this.callbacks.defaultAddress:
+                        callback(this.testData.getDefaultAddress);
+                        break;
+                    case this.callbacks.customer:
+                        callback(this.testData.getCustomer);
+                        break;
+                    case this.callbacks.lastUsedVehicle:
+                        callback(this.testData.getLastUsedVehicle);
+                        break;
+                    default:
+                        alert("Plugin closed");
+                        break;
+                }
             }
         }
     };

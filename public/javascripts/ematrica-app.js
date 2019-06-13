@@ -108,7 +108,7 @@ var app = new Framework7({
     statusbar: {
         enabled: true,
         overlay: true,
-        iosOverlaysWebView: false,
+        iosOverlaysWebView: true,
         iosBackgroundColor: '#0097DB',
         materialBackgroundColor: '#0097DB'
     }
@@ -126,8 +126,8 @@ app.statusbar.setBackgroundColor('#0097DB');
 
 app.on('init', function () {
     if ($$('html.device-ios').length > 0) {
-        $$('body').scrollTop(20);
-        $$('.view').scrollTop(20);
+        //$$('body').scrollTop(20);
+        //$$('.view').scrollTop(20);
     } else {
         app.statusbar.hide();
         $$('body').scrollTop(20);
@@ -277,8 +277,8 @@ $$(document).on('DOMContentLoaded', function(){
     })
     
     if ($$('html.device-ios').length > 0) {
-        $$('body').scrollTop(20);
-        $$('.view').scrollTop(20);
+        //$$('body').scrollTop(20);
+        //$$('.view').scrollTop(20);
     } else {
         app.statusbar.hide();
         $$('body').scrollTop(20);
